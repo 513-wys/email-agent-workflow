@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ e.subject }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1>{{ t('email_detail') }}</h1>
+  <a class="btn btn-ghost" href="{{ url_for('emails') }}">{{ t('back') }}</a>
+</div>
+
+<div class="panel">
+  <h3>{{ t('basic_info') }}</h3>
+  <div class="kv">
+    <div class="k">{{ t('sender') }}</div><div>{{ e.sender }}</div>
+    {% if e.forwarded_by %}<div class="k">{{ t('forwarded_by') }}</div><div>{{ e.forwarded_by }}</div>{% endif %}
+    <div class="k">{{ t('subject') }}</div><div>{{ e.subject }}</div>
+    <div class="k">{{ t('time') }}</div><div>{{ e.received_at or e.date }}</div>
+    <div class="k">{{ t('status') }}</div><div><span class="badge badge-{{ e.status }}">{{ status_label(e.status) }}</span></div>
+  </div>
+  {% if original_link %}
+    <p style="margin-top:14px;">
+      <a class="btn btn-primary" href="{{ original_link }}" target="_blank" rel="noopener noreferrer">{{ t('open_gmail') }}</a>
+    </p>
+  {% elif is_demo %}
+    <p class="source-note">{{ t('demo_no_original') }}</p>
+  {% else %}
+    <p class="source-note">{{ t('original_unavailable') }}</p>
+  {% endif %}
+</div>
+
+<div class="panel">
+  <h3>{{ t('security') }}</h3>
+  <div class="kv">
+    <div class="k">{{ t('threat_score') }}</div><div>{{ e.threat_score }} / 100</div>
+    <div class="k">{{ t('risk_level') }}</div><div class="risk risk-{{ e.risk_level }}">{{ e.risk_level }}</div>
+    <div class="k">{{ t('safe') }}</div><div>{{ t('safe') if e.is_safe else t('unsafe') }}</div>
+  </div>
+  {% if e.status == '已隔离' and e.summary_zh %}
+    <p class="hint" style="margin-top:12px;">{{ t('risk_reasons') }}: {{ e.summary_zh }}</p>
+  {% endif %}
+</div>
+
+{% if e.status == '已分类' %}
+<div class="panel">
+  <h3>{{ t('classification') }}</h3>
+  <div class="kv">
+    <div class="k">{{ t('intent') }}</div><div>{{ e.intent }}</div>
+    <div class="k">{{ t('category') }}</div><div>{{ category_label(e) }}</div>
+    <div class="k">{{ t('priority') }}</div><div>{{ e.priority }}</div>
+    <div class="k">{{ t('sentiment') }}</div><div>{{ e.sentiment }}</div>
+    <div class="k">{{ t('language') }}</div><div>{{ e.language }}</div>
+    {% if analysis %}
+    <div class="k">{{ t('confidence') }}</div><div>{{ '%.0f%%'|format(analysis.confidence * 100) }}</div>
+    <div class="k">{{ t('requires_action') }}</div><div>{{ t('yes') if analysis.requires_action else t('no') }}</div>
+    <div class="k">{{ t('requires_reply') }}</div><div>{{ t('yes') if analysis.requires_reply else t('no') }}</div>
+    <div class="k">{{ t('deadline') }}</div><div>{{ analysis.deadline_at or t('not_detected') }}</div>
+    {% if analysis.deadline_text %}<div class="k">{{ t('source_wording') }}</div><div>{{ analysis.deadline_text }}</div>{% endif %}
+    <div class="k">{{ t('labels') }}</div><div>{{ analysis.labels|join(', ') if analysis.labels else t('none') }}</div>
+    <div class="k">{{ t('reason_codes') }}</div><div>{{ analysis.reason_codes|join(', ') if analysis.reason_codes else t('none') }}</div>
+    {% endif %}
+  </div>
+  {% if analysis and analysis.entities %}
+  <h3 style="margin-top:16px;">{{ t('entities') }}</h3>
+  <ul class="compact-list">{% for item in analysis.entities %}<li><strong>{{ item.type }}</strong> — {{ item.value }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if analysis and analysis.action_items %}
+  <h3 style="margin-top:16px;">{{ t('action_candidates') }}</h3>
+  <ul class="compact-list">{% for item in analysis.action_items %}<li><strong>{{ item.title }}</strong>{% if item.deadline_at %} · {{ item.deadline_at }}{% endif %}{% if item.evidence %}<div class="hint">{{ item.evidence }}</div>{% endif %}</li>{% endfor %}</ul>
+  {% endif %}
+  <h3 style="margin-top:16px;">{{ t('summary') }}</h3>
+  <div class="kv">
+    <div class="k">{{ t('chinese_summary') }}</div><div>{{ e.summary_zh }}</div>
+    <div class="k">{{ t('original_summary') }}</div><div>{{ e.summary }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h3>{{ t('context') }}</h3>
+  <div class="kv">
+    <div class="k">{{ t('crm_contact') }}</div>
+    <div>
+      {% if ctx.crm_contact_found %}
+        {{ ctx.client_name }}（{{ ctx.client_tier }} / {{ ctx.deal_stage }}）
+      {% else %}{{ t('no_contact') }}{% endif %}
+    </div>
+    <div class="k">{{ t('website_summary') }}</div><div>{{ ctx.web_scraped_summary or t('none') }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="panel">
+  <h3>{{ t('raw_body') }}</h3>
+  <div class="body-text">{{ e.body_text or t('no_body') }}</div>
+</div>
+{% endblock %}

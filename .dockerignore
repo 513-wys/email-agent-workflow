@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+.git
+.venv
+data
+__pycache__
+*.pyc
+.DS_Store
+.impeccable

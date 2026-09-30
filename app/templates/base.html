@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ t('app_name') }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="brand">{{ t('app_name') }}</span>
+      <div class="nav-links">
+        <a href="{{ url_for('dashboard') }}">{{ t('dashboard') }}</a>
+        <a href="{{ url_for('emails') }}">{{ t('emails') }}</a>
+        <a href="{{ url_for('action_items_page') }}">{{ t('action_items') }}</a>
+        <a href="{{ url_for('knowledge_page') }}">{{ t('knowledge') }}</a>
+        <a href="{{ url_for('digest_page') }}">{{ t('daily_digest') }}</a>
+        {% if not public_demo %}<a href="{{ url_for('settings_page') }}">{{ t('settings') }}</a>{% endif %}
+        <a class="language-switch" href="{{ url_for('set_language', lang='zh' if lang == 'en' else 'en', next=request.full_path) }}" hreflang="{{ 'zh' if lang == 'en' else 'en' }}">{{ t('switch_language') }}</a>
+      </div>
+    </div>
+  </nav>
+  {% if public_demo %}<div class="demo-banner" role="status">{{ t('public_demo_banner') }}</div>{% endif %}
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

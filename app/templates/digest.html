@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ t('daily_digest') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1>{{ t('daily_digest') }}</h1>
+  <form method="post" action="{{ url_for('digest_generate') }}">
+    <button class="btn btn-primary" type="submit">{{ t('generate_digest') }}</button>
+  </form>
+</div>
+
+{% if digest %}
+  <div class="digest">{{ digest }}</div>
+{% else %}
+  <div class="panel"><p class="hint">{{ t('digest_empty') }}</p></div>
+{% endif %}
+{% endblock %}

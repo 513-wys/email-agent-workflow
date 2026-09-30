@@ -1,0 +1,27 @@
+# Secrets and machine-local configuration
+.env
+.env.*
+!.env.example
+
+# Private email data and runtime state
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+
+# Local design/review artifacts
+.impeccable/

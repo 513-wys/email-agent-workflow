@@ -1,0 +1,8 @@
+services:
+  email-agent:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      PUBLIC_DEMO: "true"
+      DEMO_MODE: "true"

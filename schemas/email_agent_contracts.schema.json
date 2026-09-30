@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.email-agent/schemas/contracts-1.0.0.json",
+  "title": "Email Agent Domain Contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/MailAccount" },
+    { "$ref": "#/$defs/EmailEvent" },
+    { "$ref": "#/$defs/NormalizedEmail" },
+    { "$ref": "#/$defs/SecurityAssessment" },
+    { "$ref": "#/$defs/TriageResult" },
+    { "$ref": "#/$defs/ContextBundle" },
+    { "$ref": "#/$defs/ProcessingRun" },
+    { "$ref": "#/$defs/CorrectionRecord" },
+    { "$ref": "#/$defs/DigestReport" }
+  ],
+  "$defs": {
+    "Id": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "DateTime": { "type": "string", "format": "date-time" },
+    "Email": { "type": "string", "format": "email", "maxLength": 320 },
+    "Mailbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address"],
+      "properties": {
+        "address": { "$ref": "#/$defs/Email" },
+        "name": { "type": ["string", "null"], "maxLength": 500 }
+      }
+    },
+    "MailAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "provider", "email_address", "timezone", "secret_ref", "enabled"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "provider": { "enum": ["GMAIL", "NETEASE_163", "OUTLOOK_FORWARDED"] },
+        "email_address": { "$ref": "#/$defs/Email" },
+        "display_name": { "type": ["string", "null"], "maxLength": 200 },
+        "timezone": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "secret_ref": { "$ref": "#/$defs/Id" },
+        "enabled": { "type": "boolean" },
+        "last_synced_at": { "oneOf": [{ "$ref": "#/$defs/DateTime" }, { "type": "null" }] }
+      }
+    },
+    "EmailEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "account_id", "provider", "source_id", "message_id", "received_at", "fetched_at"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "account_id": { "$ref": "#/$defs/Id" },
+        "provider": { "enum": ["GMAIL", "NETEASE_163", "OUTLOOK_FORWARDED"] },
+        "source_id": { "$ref": "#/$defs/Id" },
+        "message_id": { "$ref": "#/$defs/Id" },
+        "thread_id": { "type": ["string", "null"], "maxLength": 255 },
+        "received_at": { "$ref": "#/$defs/DateTime" },
+        "fetched_at": { "$ref": "#/$defs/DateTime" },
+        "raw_headers": { "type": "object", "additionalProperties": { "type": "string" } },
+        "raw_size_bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "NormalizedEmail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "event_id", "account_id", "message_id", "received_at", "from", "to", "subject", "text_body", "links", "original_url"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "event_id": { "$ref": "#/$defs/Id" },
+        "account_id": { "$ref": "#/$defs/Id" },
+        "message_id": { "$ref": "#/$defs/Id" },
+        "received_at": { "$ref": "#/$defs/DateTime" },
+        "from": { "$ref": "#/$defs/Mailbox" },
+        "to": { "type": "array", "items": { "$ref": "#/$defs/Mailbox" } },
+        "cc": { "type": "array", "items": { "$ref": "#/$defs/Mailbox" } },
+        "subject": { "type": "string", "maxLength": 2000 },
+        "text_body": { "type": "string", "maxLength": 1000000 },
+        "sanitized_html": { "type": ["string", "null"], "maxLength": 2000000 },
+        "forwarded_from": { "oneOf": [{ "$ref": "#/$defs/Mailbox" }, { "type": "null" }] },
+        "forwarded_subject": { "type": ["string", "null"], "maxLength": 2000 },
+        "links": { "type": "array", "items": { "type": "string", "format": "uri" }, "maxItems": 500 },
+        "attachment_names": { "type": "array", "items": { "type": "string", "maxLength": 1000 }, "maxItems": 100 },
+        "original_url": { "type": "string", "format": "uri", "maxLength": 4096 }
+      }
+    },
+    "SecurityAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["email_id", "risk_level", "threat_score", "is_safe", "rule_hits", "reason_codes", "assessed_at", "policy_version"],
+      "properties": {
+        "email_id": { "$ref": "#/$defs/Id" },
+        "risk_level": { "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "threat_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "is_safe": { "type": "boolean" },
+        "rule_hits": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "reason_codes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "model_explanation": { "type": ["string", "null"], "maxLength": 4000 },
+        "assessed_at": { "$ref": "#/$defs/DateTime" },
+        "policy_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "TriageResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["email_id", "category", "priority", "summary_zh", "requires_attention", "confidence", "reason_codes", "model_provider", "model_name", "prompt_version", "created_at"],
+      "properties": {
+        "email_id": { "$ref": "#/$defs/Id" },
+        "category": { "enum": ["VERIFICATION_CODE", "SECURITY_ALERT", "PAYMENT_BILLING", "MEETING_CALENDAR", "EDUCATION_NOTICE", "BUSINESS_INQUIRY", "CUSTOMER_SUPPORT", "PROJECT_UPDATE", "ACTION_REQUIRED", "PERSONAL", "NEWSLETTER", "MARKETING", "OTHER"] },
+        "priority": { "enum": ["P0_CRITICAL", "P1_HIGH", "P2_NORMAL", "P3_LOW"] },
+        "summary_zh": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "requires_attention": { "type": "boolean" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reason_codes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "model_provider": { "enum": ["DEEPSEEK", "OLLAMA", "RULE_FALLBACK"] },
+        "model_name": { "type": "string", "minLength": 1 },
+        "prompt_version": { "type": "string", "minLength": 1 },
+        "created_at": { "$ref": "#/$defs/DateTime" }
+      }
+    },
+    "ContextBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["email_id", "contact_matches", "web_references", "knowledge_references", "completeness", "created_at"],
+      "properties": {
+        "email_id": { "$ref": "#/$defs/Id" },
+        "contact_matches": { "type": "array", "items": { "$ref": "#/$defs/Id" } },
+        "web_references": { "type": "array", "items": { "type": "string", "format": "uri" }, "maxItems": 20 },
+        "knowledge_references": { "type": "array", "items": { "$ref": "#/$defs/Id" } },
+        "summary_zh": { "type": ["string", "null"], "maxLength": 4000 },
+        "completeness": { "enum": ["COMPLETE", "PARTIAL", "UNAVAILABLE"] },
+        "created_at": { "$ref": "#/$defs/DateTime" }
+      }
+    },
+    "ProcessingRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "email_event_id", "status", "stage", "attempt", "started_at"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "email_event_id": { "$ref": "#/$defs/Id" },
+        "status": { "enum": ["RECEIVED", "NORMALIZED", "SECURITY_CHECKED", "CLASSIFIED", "ENRICHED", "COMPLETED", "QUARANTINED", "FAILED_RETRYABLE", "FAILED_FINAL", "SKIPPED_DUPLICATE"] },
+        "stage": { "enum": ["FETCH", "NORMALIZE", "SECURITY", "TRIAGE", "CONTEXT", "PERSIST", "DIGEST"] },
+        "attempt": { "type": "integer", "minimum": 1 },
+        "started_at": { "$ref": "#/$defs/DateTime" },
+        "completed_at": { "oneOf": [{ "$ref": "#/$defs/DateTime" }, { "type": "null" }] },
+        "duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+        "error_code": { "type": ["string", "null"] },
+        "error_message_zh": { "type": ["string", "null"], "maxLength": 2000 }
+      }
+    },
+    "CorrectionRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "email_id", "field", "old_value", "new_value", "created_at"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "email_id": { "$ref": "#/$defs/Id" },
+        "field": { "enum": ["CATEGORY", "PRIORITY", "SECURITY", "SUMMARY"] },
+        "old_value": true,
+        "new_value": true,
+        "reason": { "type": ["string", "null"], "maxLength": 2000 },
+        "created_at": { "$ref": "#/$defs/DateTime" }
+      }
+    },
+    "DigestReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "report_date", "timezone", "account_ids", "total_count", "category_counts", "priority_counts", "urgent_email_ids", "body_markdown", "generated_at"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "report_date": { "type": "string", "format": "date" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "account_ids": { "type": "array", "items": { "$ref": "#/$defs/Id" }, "minItems": 1, "uniqueItems": true },
+        "total_count": { "type": "integer", "minimum": 0 },
+        "category_counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "priority_counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "urgent_email_ids": { "type": "array", "items": { "$ref": "#/$defs/Id" }, "uniqueItems": true },
+        "body_markdown": { "type": "string", "maxLength": 100000 },
+        "model_provider": { "type": ["string", "null"] },
+        "model_name": { "type": ["string", "null"] },
+        "generated_at": { "$ref": "#/$defs/DateTime" }
+      }
+    }
+  }
+}

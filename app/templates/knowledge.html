@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ t('knowledge') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="toolbar knowledge-toolbar">
+  <div>
+    <h1>{{ t('knowledge') }}</h1>
+    <p class="source-note">{{ t('knowledge_intro') }}</p>
+  </div>
+</div>
+
+<form class="knowledge-search" method="post" action="{{ url_for('knowledge_ask') }}">
+  {% if selected_topic %}<input type="hidden" name="topic_id" value="{{ selected_topic.id }}">{% endif %}
+  <label for="knowledge-question">{{ t('ask_mail') }}</label>
+  <div>
+    <input id="knowledge-question" name="question" value="{{ question }}" placeholder="{{ t('ask_placeholder') }}" required>
+    <button class="btn btn-primary" type="submit">{{ t('ask') }}</button>
+  </div>
+  <p>{{ t('retrieval_privacy') }}</p>
+</form>
+
+{% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+{% if result %}
+<section class="answer-panel" aria-live="polite">
+  <h2>{{ t('answer') }}</h2>
+  <div class="answer-text">{{ result.answer }}</div>
+  <h3>{{ t('answer_sources') }}</h3>
+  <ol class="citation-list">
+    {% for source in result.sources %}
+      <li><a href="{{ url_for('email_detail', email_id=source.email_id) }}">{{ source.title }}</a><span>{{ source.sender }}</span></li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+<div class="section-heading"><h2>{{ t('organized_topics') }}</h2><span>{{ topics|length }} {{ t('topics_count') }}</span></div>
+<section class="topic-list">
+  {% for topic in topics %}
+    <a class="topic-row" href="{{ url_for('knowledge_topic', topic_id=topic.id) }}">
+      <div class="topic-type">{{ t('topic_' + topic.topic_type|lower) }}</div>
+      <div class="topic-copy">
+        <h3>{{ topic.title_zh if lang == 'zh' else topic.title_en }}</h3>
+        <p>{{ topic.summary_zh if lang == 'zh' else topic.summary_en }}</p>
+      </div>
+      <div class="topic-count"><strong>{{ topic.email_count }}</strong><span>{{ t('related_emails') }}</span></div>
+    </a>
+  {% else %}<p class="empty-state-inline">{{ t('no_topics') }}</p>{% endfor %}
+</section>
+{% endblock %}

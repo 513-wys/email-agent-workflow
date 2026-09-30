@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: email-agent-demo
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PUBLIC_DEMO
+        value: "true"
+      - key: DEMO_MODE
+        value: "true"

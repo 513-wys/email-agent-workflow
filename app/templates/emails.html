@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ t('emails') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="toolbar"><h1>{{ t('email_list') }}</h1></div>
+
+<div class="filters">
+  <form method="get" action="{{ url_for('emails') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <select name="status">
+      <option value="">{{ t('all_statuses') }}</option>
+      {% for s in ['已隔离', '已分类', '处理失败'] %}
+        <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ status_label(s) }}</option>
+      {% endfor %}
+    </select>
+    <select name="intent">
+      <option value="">{{ t('all_categories') }}</option>
+      {% for i in ['VERIFICATION_CODE','SECURITY_ALERT','PAYMENT_BILLING','MEETING_CALENDAR','EDUCATION_NOTICE','BUSINESS_INQUIRY','CUSTOMER_SUPPORT','PROJECT_UPDATE','ACTION_REQUIRED','PERSONAL','NEWSLETTER','MARKETING','OTHER'] %}
+        <option value="{{ i }}" {% if intent == i %}selected{% endif %}>{{ category_label({'intent': i}) }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">{{ t('filter') }}</button>
+  </form>
+</div>
+
+<table class="table">
+  <thead>
+    <tr><th>{{ t('sender') }}</th><th>{{ t('subject') }}</th><th>{{ t('category') }}</th><th>{{ t('priority') }}</th><th>{{ t('language') }}</th><th>{{ t('threat_score') }}</th><th>{{ t('status') }}</th><th>{{ t('time') }}</th></tr>
+  </thead>
+  <tbody>
+  {% for e in emails %}
+    <tr>
+      <td>{{ e.sender }}</td>
+      <td><a href="{{ url_for('email_detail', email_id=e.id) }}">{{ e.subject }}</a><span class="table-summary">{{ e.summary_zh if lang == 'zh' else e.summary }}</span></td>
+      <td>{{ category_label(e) }}</td>
+      <td>{{ priority_label(e.priority) }}</td>
+      <td>{{ e.language }}</td>
+      <td>{{ e.threat_score }}</td>
+      <td><span class="badge badge-{{ e.status }}">{{ status_label(e.status) }}</span></td>
+      <td>{{ e.date }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="empty">{{ t('no_matches') }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

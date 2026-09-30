@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ t('dashboard') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1>{{ t('dashboard') }}</h1>
+  {% if not public_demo %}
+  <form method="post" action="{{ url_for('ingest') }}">
+    <button class="btn btn-primary" type="submit">{{ t('sync') }}</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if request.args.get('inserted') is not none %}
+  <p class="save-ok" role="status">{{ t('sync_result', inserted=request.args.get('inserted', 0), skipped=request.args.get('skipped', 0), failed=request.args.get('failed', 0), older_skipped=request.args.get('older_skipped', 0)) }}</p>
+{% endif %}
+
+<div class="cards">
+  <div class="card"><div class="num">{{ stats.total }}</div><div class="label">{{ t('total_emails') }}</div></div>
+  <div class="card"><div class="num">{{ stats.p01 }}</div><div class="label">{{ t('high_priority') }}</div></div>
+  <div class="card"><div class="num">{{ stats.by_status.get('已隔离', 0) }}</div><div class="label">{{ t('quarantined') }}</div></div>
+  <div class="card"><div class="num">{{ knowledge_stats.documents }}</div><div class="label">{{ t('indexed_emails') }} · {{ knowledge_stats.chunks }} {{ t('chunks') }}</div></div>
+</div>
+
+<div class="section-heading">
+  <h2>{{ t('next_actions') }}</h2>
+  <a href="{{ url_for('action_items_page') }}">{{ t('view_all') }}</a>
+</div>
+<div class="action-preview">
+  {% for item in recent_actions %}
+    <article class="action-row">
+      <span class="priority-mark priority-{{ item.priority }}">{{ item.priority }}</span>
+      <div class="action-copy">
+        <a href="{{ url_for('email_detail', email_id=item.email_id) }}">{{ item.subject }}：{{ item.title }}</a>
+        <p>{{ item.sender }}{% if item.deadline_at %} · {{ t('due') }} {{ item.deadline_at }}{% endif %}</p>
+      </div>
+      <form method="post" action="{{ url_for('action_item_status', action_id=item.id) }}">
+        <input type="hidden" name="status" value="DONE">
+        <input type="hidden" name="selected_status" value="OPEN">
+        <button class="btn btn-quiet" type="submit">{{ t('mark_done') }}</button>
+      </form>
+    </article>
+  {% else %}
+    <p class="empty-state-inline">{{ t('no_open_actions') }}</p>
+  {% endfor %}
+</div>
+
+<h2>{{ t('recent') }}</h2>
+<table class="table">
+  <thead>
+    <tr><th>{{ t('sender') }}</th><th>{{ t('subject') }}</th><th>{{ t('category') }}</th><th>{{ t('priority') }}</th><th>{{ t('status') }}</th><th>{{ t('time') }}</th></tr>
+  </thead>
+  <tbody>
+  {% for e in emails %}
+    <tr>
+      <td>{{ e.sender }}</td>
+      <td><a href="{{ url_for('email_detail', email_id=e.id) }}">{{ e.subject }}</a><span class="table-summary">{{ e.summary_zh if lang == 'zh' else e.summary }}</span></td>
+      <td>{{ category_label(e) }}</td>
+      <td>{{ priority_label(e.priority) }}</td>
+      <td><span class="badge badge-{{ e.status }}">{{ status_label(e.status) }}</span></td>
+      <td>{{ e.date }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="empty">{{ t('no_data') }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="hint">{{ t('demo_hint') }}</p>
+{% endblock %}

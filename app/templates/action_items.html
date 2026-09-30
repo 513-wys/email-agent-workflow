@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ t('action_items') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="toolbar action-toolbar">
+  <div>
+    <h1>{{ t('action_items') }}</h1>
+    <p class="source-note">{{ t('actions_intro') }}</p>
+  </div>
+</div>
+
+<nav class="status-tabs" aria-label="{{ t('action_status_filter') }}">
+  {% for value, label_key in [('OPEN','open'),('DONE','done'),('EXPIRED','expired'),('ALL','all')] %}
+    <a class="{{ 'active' if selected_status == value else '' }}" href="{{ url_for('action_items_page', status=value) }}">
+      {{ t(label_key) }}{% if value != 'ALL' %} <span>{{ action_counts.get(value, 0) }}</span>{% endif %}
+    </a>
+  {% endfor %}
+</nav>
+
+<section class="action-list">
+  {% for item in actions %}
+    <article class="action-item {{ 'is-complete' if item.status == 'DONE' else '' }}">
+      <div class="action-state" aria-hidden="true"></div>
+      <div class="action-main">
+        <div class="action-meta">
+          <span class="priority-mark priority-{{ item.priority }}">{{ item.priority }}</span>
+          <span>{{ status_label(item.status) }}</span>
+          {% if item.deadline_at %}<span>{{ t('due') }} {{ item.deadline_at }}</span>{% endif %}
+        </div>
+        <h2><a href="{{ url_for('email_detail', email_id=item.email_id) }}">{{ item.subject }}：{{ item.title }}</a></h2>
+        <p class="action-evidence">“{{ item.evidence_text }}”</p>
+        <p class="action-source">{{ t('source_email') }}: <a href="{{ url_for('email_detail', email_id=item.email_id) }}">{{ item.subject }}</a> · {{ item.sender }}</p>
+      </div>
+      <form method="post" action="{{ url_for('action_item_status', action_id=item.id) }}">
+        <input type="hidden" name="selected_status" value="{{ selected_status }}">
+        {% if item.status == 'DONE' %}
+          <input type="hidden" name="status" value="OPEN">
+          <button class="btn btn-ghost" type="submit">{{ t('restore') }}</button>
+        {% elif item.status == 'OPEN' %}
+          <input type="hidden" name="status" value="DONE">
+          <button class="btn btn-primary" type="submit">{{ t('mark_done') }}</button>
+        {% endif %}
+      </form>
+    </article>
+  {% else %}
+    <div class="actions-empty">
+      <h2>{{ t('no_actions_title') }}</h2>
+      <p>{{ t('no_actions_body') }}</p>
+      <a class="btn btn-ghost" href="{{ url_for('emails') }}">{{ t('browse_emails') }}</a>
+    </div>
+  {% endfor %}
+</section>
+{% endblock %}

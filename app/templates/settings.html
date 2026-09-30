@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1>{{ t('settings') }}</h1>
+</div>
+
+{% if saved %}
+  <p class="save-ok" role="status">{{ t('saved') }}</p>
+{% endif %}
+
+<form method="post" action="{{ url_for('settings_save') }}" class="settings-form">
+
+  <div class="panel">
+    <h3>{{ t('model') }}</h3>
+    <div class="form-row">
+      <label for="deepseek_api_key">{{ t('deepseek_key') }}</label>
+      <input
+        type="password"
+        id="deepseek_api_key"
+        name="deepseek_api_key"
+        placeholder="{{ 'Configured; leave blank to keep it' if s.deepseek_api_key_set and lang == 'en' else ('已设置，留空则不修改' if s.deepseek_api_key_set else 'Enter API key') }}"
+        autocomplete="off"
+      >
+      <p class="hint">{{ 'Email analysis uses DeepSeek when a key is configured; otherwise it uses local Ollama.' if lang == 'en' else '配置 Key 后使用 DeepSeek；留空则使用本机 Ollama。' }}</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>{{ t('mail_source') }}</h3>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" name="mail_mode" value="demo" {{ 'checked' if s.mail_mode == 'demo' else '' }} onchange="document.getElementById('real-mail-fields').hidden = true">
+        {{ t('demo_mode') }}
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="mail_mode" value="real" {{ 'checked' if s.mail_mode == 'real' else '' }} onchange="document.getElementById('real-mail-fields').hidden = false">
+        {{ t('real_mail') }}
+      </label>
+    </div>
+
+    <div id="real-mail-fields" {{ 'hidden' if s.mail_mode != 'real' else '' }}>
+      <div class="form-row">
+        <label for="mail_provider">{{ t('provider') }}</label>
+        <select id="mail_provider" name="mail_provider">
+          {% for key, p in providers.items() %}
+            <option value="{{ key }}" {{ 'selected' if s.mail_provider == key else '' }}>{{ p.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {% for key, p in providers.items() %}
+        <p class="hint provider-hint" data-provider="{{ key }}" {{ '' if s.mail_provider == key else 'hidden' }}>{{ ('Use an app password generated in your Google Account security settings.' if key == 'gmail' else 'Enable IMAP in NetEase Mail and use the generated client authorization code.') if lang == 'en' else p.hint }}</p>
+      {% endfor %}
+
+      <div class="form-row">
+        <label for="mail_user">{{ t('mail_address') }}</label>
+        <input type="text" id="mail_user" name="mail_user" value="{{ s.mail_user }}" placeholder="you@gmail.com" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label for="mail_password">{{ t('mail_password') }}</label>
+        <input
+          type="password"
+          id="mail_password"
+          name="mail_password"
+          placeholder="{{ ('Configured; leave blank to keep it' if lang == 'en' else '已设置，留空则不修改') if s.mail_password_set else ('Use an app password, not your sign-in password' if lang == 'en' else '不是登录密码，见上方说明') }}"
+          autocomplete="off"
+        >
+      </div>
+
+      <p class="hint outlook-hint">{{ 'Outlook/Hotmail: forward messages to Gmail, then connect that Gmail account here.' if lang == 'en' else 'Outlook/Hotmail：请先转发到 Gmail，再在这里连接该 Gmail 账号。' }}</p>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" type="submit">{{ t('save_settings') }}</button>
+</form>
+
+<script>
+  document.querySelectorAll('#mail_provider').forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      document.querySelectorAll('.provider-hint').forEach(function (el) {
+        el.hidden = el.dataset.provider !== sel.value;
+      });
+    });
+  });
+</script>
+{% endblock %}

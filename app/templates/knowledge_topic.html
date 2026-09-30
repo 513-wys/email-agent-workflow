@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.title_zh if lang == 'zh' else topic.title_en }} · {{ t('knowledge') }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('knowledge_page') }}">← {{ t('back_to_knowledge') }}</a>
+<header class="topic-header">
+  <div class="topic-type">{{ t('topic_' + topic.topic_type|lower) }}</div>
+  <h1>{{ topic.title_zh if lang == 'zh' else topic.title_en }}</h1>
+  <p>{{ topic.summary_zh if lang == 'zh' else topic.summary_en }}</p>
+  {% if topic.deadline_at %}<div class="topic-deadline">{{ t('latest_deadline') }}：{{ topic.deadline_at }}</div>{% endif %}
+</header>
+<form class="knowledge-search compact" method="post" action="{{ url_for('knowledge_ask') }}">
+  <input type="hidden" name="topic_id" value="{{ topic.id }}">
+  <label for="topic-question">{{ t('ask_this_topic') }}</label>
+  <div><input id="topic-question" name="question" placeholder="{{ t('ask_topic_placeholder') }}" required><button class="btn btn-primary" type="submit">{{ t('ask') }}</button></div>
+</form>
+<div class="section-heading"><h2>{{ t('related_emails') }}</h2><span>{{ emails|length }}</span></div>
+<section class="topic-email-list">
+{% for e in emails %}
+  <article><time>{{ e.received_at or e.date }}</time><h3><a href="{{ url_for('email_detail', email_id=e.id) }}">{{ e.subject }}</a></h3><p>{{ e.summary_zh if lang == 'zh' else e.summary }}</p><span>{{ e.sender }}</span></article>
+{% endfor %}
+</section>
+{% endblock %}

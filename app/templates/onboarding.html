@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ t('onboarding_title') }} · {{ t('app_name') }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="onboarding-body">
+  <header class="onboarding-topbar">
+    <span class="brand">{{ t('app_name') }}</span>
+    <a class="language-switch" href="{{ url_for('set_language', lang='zh' if lang == 'en' else 'en', next=request.full_path) }}">{{ t('switch_language') }}</a>
+  </header>
+
+  <main class="onboarding-shell">
+    <section class="onboarding-intro">
+      <div class="mail-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" role="img"><path d="M8 13h32v23H8z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m9 15 15 12 15-12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      </div>
+      <h1>{{ t('onboarding_title') }}</h1>
+      <p>{{ t('onboarding_intro') }}</p>
+      <ul class="onboarding-points">
+        <li>{{ t('onboarding_point_private') }}</li>
+        <li>{{ t('onboarding_point_recent') }}</li>
+        <li>{{ t('onboarding_point_incremental') }}</li>
+      </ul>
+    </section>
+
+    <section class="onboarding-workspace">
+      {% if ready %}
+        <div class="welcome-return">
+          <p class="step-label">{{ t('welcome_back') }}</p>
+          <h2>{{ t('workspace_ready_title') }}</h2>
+          <p class="form-intro">{{ t('workspace_ready_body') }}</p>
+          <div class="welcome-mailbox">
+            <span>{{ t('connected_mailbox') }}</span>
+            <strong>{{ s.mail_user }}</strong>
+          </div>
+          <form method="post" action="{{ url_for('enter_workspace') }}">
+            <div class="form-row">
+              <label for="return-owner-emails">{{ t('owner_emails') }}</label>
+              <textarea id="return-owner-emails" name="owner_emails" rows="3" placeholder="you@school.edu&#10;you@company.com">{{ s.owner_emails }}</textarea>
+              <p class="hint">{{ t('owner_emails_confirm_hint') }}</p>
+            </div>
+            <button class="btn btn-primary btn-wide" type="submit">{{ t('enter_workspace') }}</button>
+          </form>
+          <a class="welcome-settings-link" href="{{ url_for('settings_page') }}">{{ t('adjust_settings') }}</a>
+        </div>
+      {% elif job %}
+        <div class="import-progress" data-job-id="{{ job_id }}" data-status-url="{{ url_for('onboarding_status', job_id=job_id) }}" data-dashboard-url="{{ url_for('dashboard') }}">
+          <p class="step-label">{{ t('setup_step_import') }}</p>
+          <h2>{{ t('import_title') }}</h2>
+          <p class="progress-message" aria-live="polite">{{ t('import_connecting') }}</p>
+          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
+            <span style="transform:scaleX(.02)"></span>
+          </div>
+          <div class="progress-numbers"><strong>0 / —</strong><span>{{ t('emails_processed_short') }}</span></div>
+          <dl class="import-stats">
+            <div><dt>{{ t('processed') }}</dt><dd data-inserted>0</dd></div>
+            <div><dt>{{ t('already_present') }}</dt><dd data-skipped>0</dd></div>
+            <div><dt>{{ t('processing_failed') }}</dt><dd data-failed>0</dd></div>
+          </dl>
+          <p class="privacy-note">{{ t('import_keep_open') }}</p>
+          <a class="btn btn-primary progress-continue" href="{{ url_for('dashboard') }}" hidden>{{ t('open_dashboard') }}</a>
+        </div>
+      {% else %}
+        <form class="onboarding-form" method="post" action="{{ url_for('onboarding_start') }}">
+          <p class="step-label">{{ t('setup_step_connect') }}</p>
+          <h2>{{ t('connect_mailbox') }}</h2>
+          <p class="form-intro">{{ t('connect_mailbox_hint') }}</p>
+
+          {% if error %}<p class="form-error" role="alert">{{ t('onboarding_error_' + error) }}</p>{% endif %}
+
+          <div class="form-row">
+            <label for="mail_provider">{{ t('provider') }}</label>
+            <select id="mail_provider" name="mail_provider">
+              {% for key, p in providers.items() %}<option value="{{ key }}" {{ 'selected' if s.mail_provider == key else '' }}>{{ p.label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="mail_user">{{ t('mail_address') }}</label>
+            <input type="email" id="mail_user" name="mail_user" value="{{ s.mail_user }}" placeholder="you@gmail.com" required autocomplete="email">
+          </div>
+          <div class="form-row">
+            <label for="mail_password">{{ t('mail_password') }}</label>
+            <input type="password" id="mail_password" name="mail_password" {{ '' if s.mail_password_set else 'required' }} placeholder="{{ t('app_password_placeholder') }}" autocomplete="current-password">
+            <p class="hint">{{ t('app_password_hint') }}</p>
+          </div>
+          <div class="form-row">
+            <label for="owner_emails">{{ t('owner_emails') }}</label>
+            <textarea id="owner_emails" name="owner_emails" rows="3" placeholder="you@school.edu&#10;you@company.com">{{ s.owner_emails }}</textarea>
+            <p class="hint">{{ t('owner_emails_hint') }}</p>
+          </div>
+          <div class="form-row">
+            <label for="initial_sync_limit">{{ t('initial_sync_limit') }}</label>
+            <div class="quantity-control">
+              <input type="number" id="initial_sync_limit" name="initial_sync_limit" value="{{ s.initial_sync_limit }}" min="1" max="500" step="1" required>
+              <span>{{ t('email_unit') }}</span>
+            </div>
+            <p class="hint">{{ t('initial_sync_hint') }}</p>
+          </div>
+          <button class="btn btn-primary btn-wide" type="submit">{{ t('connect_and_import') }}</button>
+          <p class="privacy-note">{{ t('cloud_privacy_note') }}</p>
+        </form>
+      {% endif %}
+    </section>
+  </main>
+
+  {% if job %}
+  <script>
+    (() => {
+      const root = document.querySelector('.import-progress');
+      const bar = root.querySelector('.progress-track');
+      const fill = bar.querySelector('span');
+      const message = root.querySelector('.progress-message');
+      const numbers = root.querySelector('.progress-numbers strong');
+      const labels = {
+        connecting: {{ t('import_connecting')|tojson }},
+        fetching: {{ t('import_fetching')|tojson }},
+        processing: {{ t('import_processing')|tojson }},
+        complete: {{ t('import_complete')|tojson }},
+        failed: {{ t('import_failed')|tojson }}
+      };
+      async function poll() {
+        try {
+          const response = await fetch(root.dataset.statusUrl, {cache: 'no-store'});
+          const job = await response.json();
+          const determinate = job.total > 0;
+          const percent = job.status === 'complete' ? 100 : (determinate ? Math.max(4, Math.round(job.processed / job.total * 100)) : 3);
+          fill.style.transform = `scaleX(${percent / 100})`;
+          bar.setAttribute('aria-valuenow', percent);
+          bar.classList.toggle('is-indeterminate', !determinate && job.status === 'running');
+          message.textContent = job.error || labels[job.phase] || labels.processing;
+          numbers.textContent = `${job.processed || 0} / ${determinate ? job.total : '—'}`;
+          root.querySelector('[data-inserted]').textContent = job.inserted || 0;
+          root.querySelector('[data-skipped]').textContent = job.skipped || 0;
+          root.querySelector('[data-failed]').textContent = job.failed || 0;
+          if (job.status === 'complete') {
+            root.querySelector('.progress-continue').hidden = false;
+            setTimeout(() => window.location.assign(root.dataset.dashboardUrl), 1200);
+            return;
+          }
+          if (job.status !== 'failed') setTimeout(poll, 1000);
+        } catch (error) {
+          message.textContent = labels.failed;
+          setTimeout(poll, 2500);
+        }
+      }
+      poll();
+    })();
+  </script>
+  {% endif %}
+</body>
+</html>
