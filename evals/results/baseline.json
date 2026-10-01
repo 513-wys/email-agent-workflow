@@ -1,0 +1,307 @@
+{
+  "run_type": "offline deterministic baseline with gold per-message labels",
+  "dataset_id": "email-agent-public-demo-v2",
+  "metrics": {
+    "dataset_cases": 20,
+    "topic_assignment_accuracy": 0.15,
+    "action_precision": 1.0,
+    "action_recall": 0.7778,
+    "action_f1": 0.875,
+    "rag_micro_source_precision": 0.2619,
+    "rag_micro_source_recall": 0.7333,
+    "rag_exact_source_set_accuracy": 0.1,
+    "unsupported_question_abstention": 0.0
+  },
+  "topic_cases": [
+    {
+      "id": "AX4102-01",
+      "expected": "course:AX4102",
+      "predicted": "category:education_notice",
+      "correct": false
+    },
+    {
+      "id": "AX4102-02",
+      "expected": "course:AX4102",
+      "predicted": "category:education_notice",
+      "correct": false
+    },
+    {
+      "id": "AX4102-03",
+      "expected": "course:AX4102",
+      "predicted": "category:education_notice",
+      "correct": false
+    },
+    {
+      "id": "AX4102-04",
+      "expected": "course:AX4102",
+      "predicted": "category:education_notice",
+      "correct": false
+    },
+    {
+      "id": "NOVA-01",
+      "expected": "project:NOVA",
+      "predicted": "category:project_update",
+      "correct": false
+    },
+    {
+      "id": "NOVA-02",
+      "expected": "project:NOVA",
+      "predicted": "category:project_update",
+      "correct": false
+    },
+    {
+      "id": "NOVA-03",
+      "expected": "project:NOVA",
+      "predicted": "subscription:project-nova",
+      "correct": false
+    },
+    {
+      "id": "NOVA-04",
+      "expected": "project:NOVA",
+      "predicted": "category:action_required",
+      "correct": false
+    },
+    {
+      "id": "SEC-01",
+      "expected": "security:account",
+      "predicted": "security:account",
+      "correct": true
+    },
+    {
+      "id": "SEC-02",
+      "expected": null,
+      "predicted": "security:account",
+      "correct": false
+    },
+    {
+      "id": "SUB-01",
+      "expected": "subscription:CloudNotes",
+      "predicted": "subscription:cloudnotes",
+      "correct": false
+    },
+    {
+      "id": "SUB-02",
+      "expected": "subscription:CloudNotes",
+      "predicted": "subscription:cloudnotes",
+      "correct": false
+    },
+    {
+      "id": "SUB-03",
+      "expected": "subscription:CloudNotes",
+      "predicted": "subscription:cloudnotes",
+      "correct": false
+    },
+    {
+      "id": "CAREER-01",
+      "expected": "career:opportunities",
+      "predicted": "career:opportunities",
+      "correct": true
+    },
+    {
+      "id": "CAREER-02",
+      "expected": "career:opportunities",
+      "predicted": "career:opportunities",
+      "correct": true
+    },
+    {
+      "id": "EVENT-01",
+      "expected": "event:responsible-ai-roundtable",
+      "predicted": "category:meeting_calendar",
+      "correct": false
+    },
+    {
+      "id": "EVENT-02",
+      "expected": "event:responsible-ai-roundtable",
+      "predicted": "category:meeting_calendar",
+      "correct": false
+    },
+    {
+      "id": "SUPPORT-01",
+      "expected": "support:CS-1047",
+      "predicted": "category:customer_support",
+      "correct": false
+    },
+    {
+      "id": "NEWS-01",
+      "expected": "subscription:Agent Systems Weekly",
+      "predicted": "subscription:agent-systems-weekly",
+      "correct": false
+    },
+    {
+      "id": "PERSONAL-01",
+      "expected": "personal:jamie-rivera",
+      "predicted": "category:personal",
+      "correct": false
+    }
+  ],
+  "action_errors": {
+    "false_positive": [],
+    "false_negative": [
+      "NOVA-03",
+      "SUB-03"
+    ]
+  },
+  "qa_cases": [
+    {
+      "id": "QA-01",
+      "expected_sources": [
+        "AX4102-03",
+        "AX4102-04"
+      ],
+      "returned_sources": [
+        "NOVA-02",
+        "AX4102-03",
+        "AX4102-01",
+        "PERSONAL-01",
+        "AX4102-02",
+        "AX4102-04"
+      ],
+      "source_precision": 0.3333,
+      "source_recall": 1.0,
+      "pass": false
+    },
+    {
+      "id": "QA-02",
+      "expected_sources": [
+        "AX4102-03"
+      ],
+      "returned_sources": [
+        "AX4102-03",
+        "NOVA-02",
+        "AX4102-02",
+        "AX4102-04",
+        "AX4102-01",
+        "PERSONAL-01"
+      ],
+      "source_precision": 0.1667,
+      "source_recall": 1.0,
+      "pass": false
+    },
+    {
+      "id": "QA-03",
+      "expected_sources": [
+        "NOVA-04"
+      ],
+      "returned_sources": [
+        "NOVA-04",
+        "NOVA-03",
+        "NOVA-02",
+        "SUPPORT-01",
+        "NOVA-01",
+        "AX4102-01"
+      ],
+      "source_precision": 0.1667,
+      "source_recall": 1.0,
+      "pass": false
+    },
+    {
+      "id": "QA-04",
+      "expected_sources": [
+        "NOVA-03"
+      ],
+      "returned_sources": [
+        "NOVA-03",
+        "SUPPORT-01",
+        "NOVA-01"
+      ],
+      "source_precision": 0.3333,
+      "source_recall": 1.0,
+      "pass": false
+    },
+    {
+      "id": "QA-05",
+      "expected_sources": [
+        "EVENT-01",
+        "EVENT-02"
+      ],
+      "returned_sources": [
+        "EVENT-02",
+        "EVENT-01",
+        "CAREER-02",
+        "NOVA-02",
+        "AX4102-01"
+      ],
+      "source_precision": 0.4,
+      "source_recall": 1.0,
+      "pass": false
+    },
+    {
+      "id": "QA-06",
+      "expected_sources": [
+        "SUB-01",
+        "SUB-02",
+        "SUB-03",
+        "NEWS-01"
+      ],
+      "returned_sources": [
+        "NOVA-02",
+        "SEC-01",
+        "NOVA-03",
+        "AX4102-02"
+      ],
+      "source_precision": 0.0,
+      "source_recall": 0.0,
+      "pass": false
+    },
+    {
+      "id": "QA-07",
+      "expected_sources": [
+        "SEC-01"
+      ],
+      "returned_sources": [
+        "SEC-01",
+        "NOVA-01"
+      ],
+      "source_precision": 0.5,
+      "source_recall": 1.0,
+      "pass": false
+    },
+    {
+      "id": "QA-08",
+      "expected_sources": [
+        "SUPPORT-01"
+      ],
+      "returned_sources": [
+        "SUPPORT-01",
+        "NOVA-02"
+      ],
+      "source_precision": 0.5,
+      "source_recall": 1.0,
+      "pass": false
+    },
+    {
+      "id": "QA-09",
+      "expected_sources": [
+        "CAREER-01",
+        "CAREER-02"
+      ],
+      "returned_sources": [
+        "CAREER-01",
+        "CAREER-02"
+      ],
+      "source_precision": 1.0,
+      "source_recall": 1.0,
+      "pass": true
+    },
+    {
+      "id": "QA-10",
+      "expected_sources": [],
+      "returned_sources": [
+        "NOVA-02",
+        "SUPPORT-01",
+        "CAREER-02",
+        "SUB-01",
+        "NOVA-03",
+        "NOVA-01"
+      ],
+      "source_precision": 0.0,
+      "source_recall": 1.0,
+      "pass": false
+    }
+  ],
+  "limitations": [
+    "LLM security, classification, summaries, and answer generation are not scored in this offline run.",
+    "Gold labels are injected so this baseline isolates deterministic downstream behavior.",
+    "Exact source-set accuracy is intentionally strict; extra relevant context still counts as a set mismatch."
+  ]
+}
