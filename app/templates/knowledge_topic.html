@@ -9,6 +9,7 @@
   {% if topic.deadline_at %}<div class="topic-deadline">{{ t('latest_deadline') }}：{{ topic.deadline_at }}</div>{% endif %}
 </header>
 <form class="knowledge-search compact" method="post" action="{{ url_for('knowledge_ask') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="topic_id" value="{{ topic.id }}">
   <label for="topic-question">{{ t('ask_this_topic') }}</label>
   <div><input id="topic-question" name="question" placeholder="{{ t('ask_topic_placeholder') }}" required><button class="btn btn-primary" type="submit">{{ t('ask') }}</button></div>

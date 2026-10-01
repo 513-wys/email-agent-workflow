@@ -4,7 +4,7 @@ from datetime import datetime
 from threading import Lock, Thread
 from uuid import uuid4
 
-from app import pipeline, settings_store
+from app import db, pipeline, settings_store, tenant
 
 
 _jobs = {}
@@ -17,19 +17,25 @@ def _update(job_id, **values):
             _jobs[job_id].update(values)
 
 
-def get(job_id):
+def get(job_id, workspace_id=None):
     with _lock:
         job = _jobs.get(job_id)
+        if job and workspace_id is not None and job.get("workspace_id") != int(workspace_id):
+            return None
         return deepcopy(job) if job else None
 
 
-def _run(job_id, limit):
+def _run(job_id, limit, workspace_id):
     try:
-        def progress(event):
-            _update(job_id, **event)
+        with tenant.workspace(workspace_id):
+            db.init_db()
+            settings_store.init_table()
 
-        result = pipeline.ingest(limit=limit, progress_callback=progress)
-        settings_store.set("initial_sync_completed", "1")
+            def progress(event):
+                _update(job_id, **event)
+
+            result = pipeline.ingest(limit=limit, progress_callback=progress)
+            settings_store.set("initial_sync_completed", "1")
         _update(
             job_id,
             status="complete",
@@ -45,14 +51,16 @@ def _run(job_id, limit):
         _update(job_id, status="failed", phase="failed", error=str(exc)[:240])
 
 
-def start(limit):
+def start(limit, workspace_id=None):
+    workspace_id = int(workspace_id or tenant.current_id() or 0)
     job_id = uuid4().hex
     with _lock:
         _jobs[job_id] = {
             "id": job_id, "status": "running", "phase": "connecting",
             "total": 0, "processed": 0, "inserted": 0, "skipped": 0,
             "failed": 0, "older_skipped": 0, "error": "",
+            "workspace_id": workspace_id,
             "started_at": datetime.now().astimezone().isoformat(),
         }
-    Thread(target=_run, args=(job_id, limit), daemon=True).start()
+    Thread(target=_run, args=(job_id, limit, workspace_id), daemon=True).start()
     return job_id

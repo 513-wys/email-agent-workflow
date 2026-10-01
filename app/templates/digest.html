@@ -4,6 +4,7 @@
 <div class="toolbar">
   <h1>{{ t('daily_digest') }}</h1>
   <form method="post" action="{{ url_for('digest_generate') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button class="btn btn-primary" type="submit">{{ t('generate_digest') }}</button>
   </form>
 </div>

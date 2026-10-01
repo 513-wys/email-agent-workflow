@@ -18,6 +18,13 @@
         <a href="{{ url_for('digest_page') }}">{{ t('daily_digest') }}</a>
         {% if not public_demo %}<a href="{{ url_for('settings_page') }}">{{ t('settings') }}</a>{% endif %}
         <a class="language-switch" href="{{ url_for('set_language', lang='zh' if lang == 'en' else 'en', next=request.full_path) }}" hreflang="{{ 'zh' if lang == 'en' else 'en' }}">{{ t('switch_language') }}</a>
+        {% if multi_user and current_user %}
+          <form class="nav-account" method="post" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <span title="{{ current_user.email }}">{{ current_user.email }}</span>
+            <button type="submit">{{ 'Sign out' if lang == 'en' else '退出' }}</button>
+          </form>
+        {% endif %}
       </div>
     </div>
   </nav>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ ('Create account' if mode == 'register' else 'Sign in') if lang == 'en' else ('创建账户' if mode == 'register' else '登录') }} · {{ t('app_name') }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body">
+  <header class="onboarding-topbar">
+    <span class="brand">{{ t('app_name') }}</span>
+    <a class="language-switch" href="{{ url_for('set_language', lang='zh' if lang == 'en' else 'en', next=request.full_path) }}">{{ t('switch_language') }}</a>
+  </header>
+  <main class="auth-shell">
+    <section class="auth-story">
+      <div class="mail-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M8 13h32v23H8z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m9 15 15 12 15-12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      </div>
+      <h1>{{ 'Your inbox, organized around action.' if lang == 'en' else '让收件箱围绕行动重新组织。' }}</h1>
+      <p>{{ 'Connect your own mailbox and model key. Every account gets an isolated workspace.' if lang == 'en' else '连接你自己的邮箱和模型密钥；每个账户都有完全独立的工作区。' }}</p>
+      <ul class="auth-promises">
+        <li>{{ 'Your mailbox data is never shared with other users.' if lang == 'en' else '你的邮件数据不会与其他用户共享。' }}</li>
+        <li>{{ 'Credentials are encrypted before storage.' if lang == 'en' else '邮箱凭据和 API Key 加密保存。' }}</li>
+        <li>{{ 'You stay in control of every sync.' if lang == 'en' else '每一次收信都由你主动控制。' }}</li>
+      </ul>
+    </section>
+    <section class="auth-card">
+      <h2>{{ ('Create your workspace' if mode == 'register' else 'Welcome back') if lang == 'en' else ('创建你的工作区' if mode == 'register' else '欢迎回来') }}</h2>
+      <p>{{ ('Start with an account, then connect Gmail and DeepSeek.' if mode == 'register' else 'Sign in to continue to your private workspace.') if lang == 'en' else ('先创建账户，然后连接 Gmail 和 DeepSeek。' if mode == 'register' else '登录后进入你的私人工作区。') }}</p>
+      {% if error %}
+        <p class="form-error" role="alert">
+          {% if lang == 'en' %}
+            {{ {'credentials':'Email or password is incorrect.','email':'Enter a valid email address.','password':'Use at least 10 characters.','exists':'An account already uses this email.','match':'The passwords do not match.'}.get(error, 'Could not continue. Check the form and try again.') }}
+          {% else %}
+            {{ {'credentials':'邮箱或密码不正确。','email':'请输入有效的邮箱地址。','password':'密码至少需要10个字符。','exists':'该邮箱已经注册。','match':'两次输入的密码不一致。'}.get(error, '暂时无法继续，请检查后重试。') }}
+          {% endif %}
+        </p>
+      {% endif %}
+      <form method="post" action="{{ url_for(mode) }}" class="auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <div class="form-row">
+          <label for="email">{{ 'Email address' if lang == 'en' else '邮箱地址' }}</label>
+          <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com" value="{{ request.form.get('email', '') }}">
+        </div>
+        <div class="form-row">
+          <label for="password">{{ 'Password' if lang == 'en' else '密码' }}</label>
+          <input type="password" id="password" name="password" required minlength="10" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}">
+          {% if mode == 'register' %}<p class="hint">{{ 'At least 10 characters.' if lang == 'en' else '至少10个字符。' }}</p>{% endif %}
+        </div>
+        {% if mode == 'register' %}
+        <div class="form-row">
+          <label for="confirm_password">{{ 'Confirm password' if lang == 'en' else '确认密码' }}</label>
+          <input type="password" id="confirm_password" name="confirm_password" required minlength="10" autocomplete="new-password">
+        </div>
+        {% endif %}
+        <button class="btn btn-primary btn-wide" type="submit">{{ ('Create account' if mode == 'register' else 'Sign in') if lang == 'en' else ('创建账户' if mode == 'register' else '登录') }}</button>
+      </form>
+      <p class="auth-switch">
+        {% if mode == 'register' %}
+          {{ 'Already have an account?' if lang == 'en' else '已经有账户？' }} <a href="{{ url_for('login') }}">{{ 'Sign in' if lang == 'en' else '登录' }}</a>
+        {% else %}
+          {{ 'New here?' if lang == 'en' else '第一次使用？' }} <a href="{{ url_for('register') }}">{{ 'Create an account' if lang == 'en' else '创建账户' }}</a>
+        {% endif %}
+      </p>
+    </section>
+  </main>
+</body>
+</html>

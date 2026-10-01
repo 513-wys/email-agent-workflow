@@ -1,17 +1,26 @@
 """Flask 应用：中文 Web 界面 + 路由。"""
 import json
 import re
+from datetime import timedelta
 
-from flask import Flask, jsonify, make_response, redirect, render_template, request, url_for
+from flask import Flask, abort, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from urllib.parse import urlsplit
 
-from app import config, db, demo_seed, digest as digest_mod, import_jobs, notify, pipeline, rag, settings_store, topics
+from app import auth, config, db, demo_seed, digest as digest_mod, import_jobs, notify, pipeline, rag, settings_store, tenant, topics
 from app.i18n import LANGUAGES, category_label, priority_label, status_label, translate
 from app.mail_links import gmail_message_url
 
 app = Flask(__name__)
+app.secret_key = config.APP_SECRET_KEY
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=config.COOKIE_SECURE,
+    PERMANENT_SESSION_LIFETIME=timedelta(days=14),
+)
 db.init_db()
 settings_store.init_table()
+auth.init_db()
 if config.PUBLIC_DEMO:
     demo_seed.seed()
     settings_store.set("initial_sync_completed", "1")
@@ -19,6 +28,34 @@ if config.PUBLIC_DEMO:
 
 def _language():
     return request.cookies.get("language") if request.cookies.get("language") in LANGUAGES else "en"
+
+
+def _hosted_mode():
+    return config.MULTI_USER_MODE and not config.PUBLIC_DEMO
+
+
+@app.before_request
+def load_account():
+    g.user = auth.get_user(session.get("user_id")) if _hosted_mode() else None
+    g.tenant_token = None
+    if g.user:
+        g.tenant_token = tenant.bind(g.user["id"])
+        db.init_db()
+        settings_store.init_table()
+
+    public_endpoints = {"login", "register", "health", "set_language", "static"}
+    if _hosted_mode() and request.endpoint not in public_endpoints and not g.user:
+        return redirect(url_for("login", next=request.path))
+    if _hosted_mode() and request.method == "POST":
+        if not auth.valid_csrf(request.form.get("csrf_token") or request.headers.get("X-CSRF-Token")):
+            abort(400, description="The form expired. Reload the page and try again.")
+
+
+@app.teardown_request
+def release_account(_error=None):
+    token = getattr(g, "tenant_token", None)
+    if token is not None:
+        tenant.reset(token)
 
 
 @app.context_processor
@@ -31,7 +68,66 @@ def inject_i18n():
         "category_label": lambda email: category_label(lang, email.get("intent"), email.get("category")),
         "priority_label": lambda value: priority_label(lang, value),
         "public_demo": config.PUBLIC_DEMO,
+        "multi_user": _hosted_mode(),
+        "current_user": getattr(g, "user", None),
+        "csrf_token": auth.csrf_token,
     }
+
+
+def _safe_next(default="home"):
+    target = request.values.get("next", "")
+    parsed = urlsplit(target)
+    if target.startswith("/") and not parsed.scheme and not parsed.netloc:
+        return target
+    return url_for(default)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if not _hosted_mode():
+        return redirect(url_for("home"))
+    if g.user:
+        return redirect(url_for("home"))
+    error = ""
+    if request.method == "POST":
+        user = auth.authenticate(request.form.get("email"), request.form.get("password"))
+        if user:
+            next_target = _safe_next()
+            session.clear()
+            session["user_id"] = user["id"]
+            session.permanent = True
+            return redirect(next_target)
+        error = "credentials"
+    return render_template("auth.html", mode="login", error=error, next=request.values.get("next", ""))
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if not _hosted_mode():
+        return redirect(url_for("home"))
+    if g.user:
+        return redirect(url_for("home"))
+    error = ""
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        if password != request.form.get("confirm_password", ""):
+            error = "match"
+        else:
+            try:
+                user = auth.create_user(request.form.get("email"), password)
+                session.clear()
+                session["user_id"] = user["id"]
+                session.permanent = True
+                return redirect(url_for("onboarding"))
+            except ValueError as exc:
+                error = str(exc)
+    return render_template("auth.html", mode="register", error=error, next="")
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 @app.route("/language/<lang>")
@@ -112,7 +208,7 @@ def onboarding():
     if settings_store.get("initial_sync_completed", "0") == "1":
         return redirect(url_for("dashboard"))
     job_id = request.args.get("job", "")
-    job = import_jobs.get(job_id) if job_id else None
+    job = import_jobs.get(job_id, g.user["id"] if _hosted_mode() else None) if job_id else None
     return render_template(
         "onboarding.html", s=settings_store.get_all_masked(),
         providers=settings_store.PROVIDERS, job=job, job_id=job_id, ready=False,
@@ -128,12 +224,15 @@ def onboarding_start():
     mail_user = request.form.get("mail_user", "").strip()
     mail_password = request.form.get("mail_password", "").strip()
     owner_emails = request.form.get("owner_emails", "").strip()
+    api_key = request.form.get("deepseek_api_key", "").strip()
     if provider not in settings_store.PROVIDERS:
         provider = "gmail"
     if not mail_user or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", mail_user):
         return redirect(url_for("onboarding", error="email"))
     if not mail_password and not settings_store.get("mail_password", config.IMAP_PASSWORD):
         return redirect(url_for("onboarding", error="password"))
+    if _hosted_mode() and not api_key and not settings_store.get("deepseek_api_key"):
+        return redirect(url_for("onboarding", error="api_key"))
     try:
         limit = max(1, min(int(request.form.get("initial_sync_limit", "100")), 500))
     except (TypeError, ValueError):
@@ -146,15 +245,17 @@ def onboarding_start():
     settings_store.set("owner_emails", "\n".join(address.lower() for address in owners))
     if mail_password:
         settings_store.set("mail_password", mail_password)
+    if api_key:
+        settings_store.set("deepseek_api_key", api_key)
     settings_store.set("initial_sync_limit", str(limit))
     settings_store.set("initial_sync_completed", "0")
-    job_id = import_jobs.start(limit)
+    job_id = import_jobs.start(limit, g.user["id"] if _hosted_mode() else None)
     return redirect(url_for("onboarding", job=job_id))
 
 
 @app.route("/onboarding/status/<job_id>")
 def onboarding_status(job_id):
-    job = import_jobs.get(job_id)
+    job = import_jobs.get(job_id, g.user["id"] if _hosted_mode() else None)
     if not job:
         return jsonify({"status": "missing"}), 404
     return jsonify(job)
@@ -322,4 +423,5 @@ def settings_save():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "mode": "public-demo" if config.PUBLIC_DEMO else "personal"})
+    mode = "public-demo" if config.PUBLIC_DEMO else ("multi-user" if _hosted_mode() else "personal")
+    return jsonify({"status": "ok", "mode": mode})

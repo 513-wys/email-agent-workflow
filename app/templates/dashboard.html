@@ -5,6 +5,7 @@
   <h1>{{ t('dashboard') }}</h1>
   {% if not public_demo %}
   <form method="post" action="{{ url_for('ingest') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button class="btn btn-primary" type="submit">{{ t('sync') }}</button>
   </form>
   {% endif %}
@@ -34,6 +35,7 @@
         <p>{{ item.sender }}{% if item.deadline_at %} · {{ t('due') }} {{ item.deadline_at }}{% endif %}</p>
       </div>
       <form method="post" action="{{ url_for('action_item_status', action_id=item.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="status" value="DONE">
         <input type="hidden" name="selected_status" value="OPEN">
         <button class="btn btn-quiet" type="submit">{{ t('mark_done') }}</button>

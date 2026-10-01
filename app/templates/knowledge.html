@@ -9,6 +9,7 @@
 </div>
 
 <form class="knowledge-search" method="post" action="{{ url_for('knowledge_ask') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   {% if selected_topic %}<input type="hidden" name="topic_id" value="{{ selected_topic.id }}">{% endif %}
   <label for="knowledge-question">{{ t('ask_mail') }}</label>
   <div>

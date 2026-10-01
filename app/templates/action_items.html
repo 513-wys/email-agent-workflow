@@ -31,6 +31,7 @@
         <p class="action-source">{{ t('source_email') }}: <a href="{{ url_for('email_detail', email_id=item.email_id) }}">{{ item.subject }}</a> · {{ item.sender }}</p>
       </div>
       <form method="post" action="{{ url_for('action_item_status', action_id=item.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="selected_status" value="{{ selected_status }}">
         {% if item.status == 'DONE' %}
           <input type="hidden" name="status" value="OPEN">

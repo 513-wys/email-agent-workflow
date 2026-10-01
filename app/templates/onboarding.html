@@ -37,6 +37,7 @@
             <strong>{{ s.mail_user }}</strong>
           </div>
           <form method="post" action="{{ url_for('enter_workspace') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-row">
               <label for="return-owner-emails">{{ t('owner_emails') }}</label>
               <textarea id="return-owner-emails" name="owner_emails" rows="3" placeholder="you@school.edu&#10;you@company.com">{{ s.owner_emails }}</textarea>
@@ -65,11 +66,20 @@
         </div>
       {% else %}
         <form class="onboarding-form" method="post" action="{{ url_for('onboarding_start') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <p class="step-label">{{ t('setup_step_connect') }}</p>
           <h2>{{ t('connect_mailbox') }}</h2>
           <p class="form-intro">{{ t('connect_mailbox_hint') }}</p>
 
           {% if error %}<p class="form-error" role="alert">{{ t('onboarding_error_' + error) }}</p>{% endif %}
+
+          {% if multi_user %}
+          <div class="form-row credential-field">
+            <label for="deepseek_api_key">DeepSeek API Key</label>
+            <input type="password" id="deepseek_api_key" name="deepseek_api_key" {{ '' if s.deepseek_api_key_set else 'required' }} placeholder="{{ 'Configured; leave blank to keep it' if s.deepseek_api_key_set and lang == 'en' else ('已设置，留空则不修改' if s.deepseek_api_key_set else 'sk-…') }}" autocomplete="off">
+            <p class="hint">{{ 'Used only to analyze your email. It is encrypted before storage.' if lang == 'en' else '仅用于分析你的邮件，保存前会进行加密。' }}</p>
+          </div>
+          {% endif %}
 
           <div class="form-row">
             <label for="mail_provider">{{ t('provider') }}</label>

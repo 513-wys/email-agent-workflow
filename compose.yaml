@@ -6,3 +6,5 @@ services:
     environment:
       PUBLIC_DEMO: "true"
       DEMO_MODE: "true"
+      MULTI_USER_MODE: "false"
+      COOKIE_SECURE: "false"

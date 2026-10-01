@@ -1,7 +1,11 @@
 """运行时可改设置：优先读本地 SQLite，未设置则回退 .env/config 默认值。"""
 import sqlite3
+import base64
+import hashlib
 
 from app import config
+from app import tenant
+from cryptography.fernet import Fernet, InvalidToken
 
 SECRET_KEYS = {"deepseek_api_key", "mail_password"}
 
@@ -22,7 +26,7 @@ PROVIDERS = {
 
 
 def _conn():
-    conn = sqlite3.connect(config.DB_PATH)
+    conn = sqlite3.connect(tenant.db_path())
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -40,14 +44,28 @@ def get(key, default=None):
     conn.close()
     if row is None or row["value"] is None or row["value"] == "":
         return default
-    return row["value"]
+    value = row["value"]
+    if key in SECRET_KEYS and value.startswith("enc:v1:"):
+        try:
+            return _fernet().decrypt(value.removeprefix("enc:v1:").encode()).decode()
+        except (InvalidToken, ValueError):
+            return default
+    return value
 
 
 def set(key, value):
+    if key in SECRET_KEYS and value:
+        value = "enc:v1:" + _fernet().encrypt(str(value).encode()).decode()
     conn = _conn()
     conn.execute("INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)", (key, value))
     conn.commit()
     conn.close()
+
+
+def _fernet():
+    source = (config.APP_ENCRYPTION_KEY or config.APP_SECRET_KEY).encode()
+    key = base64.urlsafe_b64encode(hashlib.sha256(source).digest())
+    return Fernet(key)
 
 
 def get_all_masked():

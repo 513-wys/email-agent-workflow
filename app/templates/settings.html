@@ -10,6 +10,7 @@
 {% endif %}
 
 <form method="post" action="{{ url_for('settings_save') }}" class="settings-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <div class="panel">
     <h3>{{ t('model') }}</h3>

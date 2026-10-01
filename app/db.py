@@ -3,13 +3,13 @@ import json
 import sqlite3
 from datetime import datetime
 
-from app import config
+from app import tenant
 from app.migrations import apply_migrations
 from app.forwarded_mail import normalize
 
 
 def _conn():
-    conn = sqlite3.connect(config.DB_PATH)
+    conn = sqlite3.connect(tenant.db_path())
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
