@@ -1,0 +1,26 @@
+{
+  "evaluation_type": "simulated independent human review",
+  "evaluation_date": "2026-10-01",
+  "rubric_version": "human-eval-v1",
+  "dataset_id": "email-agent-public-demo-v2",
+  "overall_score": 76,
+  "maximum_score": 100,
+  "rating": "Credible prototype",
+  "dimensions": [
+    {"name": "Task correctness", "score": 17, "maximum": 20},
+    {"name": "Answer completeness and usefulness", "score": 13, "maximum": 20},
+    {"name": "Retrieval relevance", "score": 14, "maximum": 15},
+    {"name": "Citation faithfulness and traceability", "score": 8, "maximum": 10},
+    {"name": "Safety and privacy", "score": 9, "maximum": 10},
+    {"name": "Robustness and generalization", "score": 4, "maximum": 10},
+    {"name": "UX and demo readiness", "score": 4, "maximum": 5},
+    {"name": "Reproducibility and transparency", "score": 7, "maximum": 10}
+  ],
+  "automatic_regression_score_is_overall_quality_score": false,
+  "key_limitation": "The development and evaluation set is the same fixed set, gold per-message labels are injected, and generated answer text is not scored.",
+  "missing_submission_deliverables": [
+    "Final business and technical trade-off report of no more than 1,200 words",
+    "Recorded 5 +/- 3 minute presenter-and-screen demo",
+    "Held-out and model-backed evaluation results"
+  ]
+}
