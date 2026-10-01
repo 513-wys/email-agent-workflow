@@ -1,8 +1,8 @@
-# AI Email Agent
+# TraceInbox
 
-[Live course demo](https://email-agent-workflow.onrender.com/) · [Final report](FINAL_REPORT.md) · [Evaluation results](evals/results/metrics_summary.md) · [Architecture](ARCHITECTURE.md) · [Security and privacy](SECURITY_PRIVACY.md)
+[Live course demo](https://email-agent-workflow.onrender.com/) · [Formatted Word report](deliverables/TraceInbox_Final_Project_Report.docx) · [Report text](FINAL_REPORT.md) · [Evaluation results](evals/results/metrics_summary.md) · [Architecture](ARCHITECTURE.md)
 
-AI Email Agent is a bilingual, privacy-aware workflow that turns a crowded inbox into a traceable workspace. It imports email, checks security risk, classifies and summarizes messages, extracts action items, groups related messages into knowledge topics, creates a daily digest, and answers cross-email questions with links to the supporting messages.
+TraceInbox is a bilingual, privacy-aware email intelligence workspace that turns a crowded inbox into a traceable working view. It imports email, checks security risk, classifies and summarizes messages, extracts action items, groups related messages into knowledge topics, creates a daily digest, and answers cross-email questions with links to the supporting messages.
 
 The repository contains a safe 20-email public demonstration, the local/full product implementation, synthetic data, executable evaluations, saved results, tests, deployment configuration, and the course report.
 
@@ -12,7 +12,7 @@ For the fastest review:
 
 1. Open the [live demo](https://email-agent-workflow.onrender.com/). Its prefilled email and API fields are fictional and are never submitted to a mailbox or model.
 2. Try the dashboard, email details, actions, knowledge topics, cited questions, daily digest, language switch, and simulated “open original email” flow.
-3. Read the [≤1,200-word final report](FINAL_REPORT.md) for the problem, business/technical trade-offs, critique, difficulties, tuning, results, and future path.
+3. Read the polished [≤1,200-word Word report](deliverables/TraceInbox_Final_Project_Report.docx) for the problem, business/technical trade-offs, critique, difficulties, tuning, results, and future path. A plain-text version remains in [FINAL_REPORT.md](FINAL_REPORT.md).
 4. Inspect the [20 transparent synthetic emails](fixtures/demo_email_cases.json) and their [data explainer](fixtures/README.md).
 5. Review the [evaluation explainer](evals/README.md), [metric summary](evals/results/metrics_summary.md), and saved [real-DeepSeek results](evals/results/model_evaluation.md).
 6. Run the Docker demo and automated tests using the commands below.
@@ -183,7 +183,7 @@ Passwords are salted and hashed. Mailbox app passwords and DeepSeek keys are enc
 | `tests/` | Automated unit and integration regression tests |
 | `Dockerfile`, `compose.yaml`, `render.yaml` | Local container and Render deployment |
 | `PRODUCT.md`, `ARCHITECTURE.md`, `DESIGN.md` | Detailed product, technical, and visual-design decisions |
-| `FINAL_REPORT.md` | Course report within the requested word limit |
+| `deliverables/TraceInbox_Final_Project_Report.docx`, `FINAL_REPORT.md` | Formatted submission report and plain-text repository version |
 
 Every Python application module includes a module-level description so a human reviewer or coding agent can scan responsibilities without reading every line.
 
@@ -196,14 +196,14 @@ Every Python application module includes a module-level description so a human r
 - The real-model run found incomplete answers, a security-alert contradiction, and slow QA latency. These failures are retained in the results rather than hidden.
 - Attachments, provider OAuth, native Outlook/Microsoft Graph, cost telemetry, user corrections, and a production security audit remain future work.
 
-The full business and technical critique is in [FINAL_REPORT.md](FINAL_REPORT.md).
+The full business and technical critique is in the [formatted Word report](deliverables/TraceInbox_Final_Project_Report.docx) and [plain-text report](FINAL_REPORT.md).
 
 ## Course-deliverable checklist
 
 | Requirement | Repository evidence | Status |
 | --- | --- | --- |
 | Problem statement | This README and [PRODUCT.md](PRODUCT.md) | Complete |
-| Business and technical trade-off analysis, ≤1,200 words | [FINAL_REPORT.md](FINAL_REPORT.md), approximately 1,067 words | Complete |
+| Business and technical trade-off analysis, ≤1,200 words | [TraceInbox Word report](deliverables/TraceInbox_Final_Project_Report.docx), approximately 1,133 words | Complete |
 | Working code in GitHub | Application, Docker setup, tests, and deployment configuration | Complete |
 | Transparent data plus explainer | `fixtures/*.json` and [fixtures/README.md](fixtures/README.md) | Complete |
 | Transparent evals plus explainer | `evals/*.json`, runners, [evals/README.md](evals/README.md), and saved results | Complete |

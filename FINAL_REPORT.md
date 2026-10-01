@@ -1,4 +1,4 @@
-# AI Email Agent: From Inbox Noise to Traceable Action
+# TraceInbox A Privacy Aware Email Intelligence Workspace
 
 ## Problem and intended user
 
