@@ -8,7 +8,7 @@
 </head>
 <body class="onboarding-body">
   <header class="onboarding-topbar">
-    <span class="brand">{{ t('app_name') }}</span>
+    <span class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 7.25 12 12.5l7.5-5.25M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ t('app_name') }}</span>
     <a class="language-switch" href="{{ url_for('set_language', lang='zh' if lang == 'en' else 'en', next=request.full_path) }}">{{ t('switch_language') }}</a>
   </header>
 
