@@ -31,3 +31,13 @@ The checked-in `results/holdout.md` and `results/holdout.json` are the first-run
 `results/holdout_after_fix.*` records the regression after the discovered failures were addressed. It must not be presented as a second independent test; its purpose is to show which known failures were fixed and which remain.
 
 The public deployment disables external model calls. Its published evaluation questions use checked-in, model-free synthesis in `app/demo_answers.py`; arbitrary questions fall back to extractive local evidence. This makes the course demo reproducible and auditable, but it is not evidence of model-backed answer quality.
+
+## Model-backed evaluation
+
+Run the configured DeepSeek backend on synthetic data only with:
+
+```bash
+PYTHONPATH=. python evals/run_model_evaluation.py
+```
+
+The command saves the raw predictions, answers, latency and automatic scores to `results/model_evaluation.json` and a readable table to `results/model_evaluation.md`. It makes external API calls and may incur provider usage. `results/model_answer_human_review.md` records the author-scored semantic review of the saved answers; it is explicitly not presented as an independent blind study. `results/metrics_summary.md` is the canonical comparison of targets and reached metrics.

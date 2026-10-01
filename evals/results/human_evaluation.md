@@ -1,5 +1,7 @@
 # Simulated Independent Human Evaluation
 
+> Historical snapshot: this score was produced before the real-model run. It is retained unchanged to avoid retroactively rewriting an earlier review. See `model_evaluation.md`, `model_answer_human_review.md`, and `metrics_summary.md` for the newer evidence.
+
 Evaluation date: 1 October 2026  
 Evaluated artifact: `email-agent-public-demo-v2`  
 Rubric: `evals/HUMAN_EVAL_RUBRIC.md`
@@ -72,10 +74,14 @@ For the report, the defensible claim is: **“The tuned deterministic layer achi
 | Transparent evals and explainer | `evals/demo_qa_cases.json`, `evals/README.md`, this rubric and result | Present |
 | Legible module-level code documentation | Module docstrings, README module map, architecture documentation | Mostly present |
 | Persona, input, output, architecture | `PRODUCT.md`, `README.md`, `ARCHITECTURE.md` | Present |
-| Targeted metrics and reached metrics | Baseline/final comparison, frozen holdout, and human score | Present, but model-backed metrics remain missing |
+| Targeted metrics and reached metrics | Baseline/final comparison, frozen holdout, human score, and subsequent model-backed run | Present; see `metrics_summary.md` |
 
 This checklist should be updated again immediately before submission.
 
 ## Post-review engineering note
 
 The first holdout was kept unchanged. General topic extraction and unsupported-query filtering were subsequently improved and recorded separately in `holdout_after_fix.*`. That rerun reaches 100% topic-key accuracy and unsupported-question abstention, while strict RAG source-set accuracy remains 80% because one multi-email course-status question omits necessary evidence. Since the holdout informed these changes, the 71/100 human score is intentionally unchanged pending a second unseen set.
+
+## Subsequent model-evaluation note
+
+On 2 October 2026 the project added a saved real-DeepSeek run over synthetic data. It measured classification and answer latency, retained all generated answers, and added an author-scored semantic review. The evidence closes the earlier “missing model-backed result” artifact gap, but it does not make this historical 71/100 score independent or justify changing it after the fact. The main unresolved evidence gaps are a second untouched holdout, multilingual cases, provider cost telemetry, and an independent reviewer.
