@@ -24,6 +24,27 @@ def _entity(analysis, kinds):
     return ""
 
 
+def _slug(value):
+    return re.sub(r"[^a-z0-9]+", "-", str(value).lower()).strip("-")
+
+
+def _subscription_organization(email, analysis):
+    entity = _entity(analysis, {"ORGANIZATION", "PROJECT"})
+    if entity:
+        return entity
+    subject = str(email.get("subject") or "").strip()
+    match = re.match(
+        r"([A-Z][A-Za-z0-9]*(?:\s+[A-Z][A-Za-z0-9]*){0,2})\s+"
+        r"(?:annual\s+plan|pro\b|renewal\b|payment\b|card\b|plan\b|now\b)",
+        subject,
+    )
+    if match:
+        return match.group(1).strip()
+    sender = str(email.get("sender") or "")
+    domain = sender.rsplit("@", 1)[-1].split(".", 1)[0]
+    return domain.replace("-", " ").title() if domain and domain != sender else "Subscriptions"
+
+
 def classify(email, analysis):
     """Return a stable topic key, type, and bilingual title."""
     text = _text(email, analysis)
@@ -37,28 +58,42 @@ def classify(email, analysis):
     if support_case:
         case_id = support_case.group(1).upper()
         return f"support:{case_id}", "SUPPORT", f"Support case {case_id}", f"支持工单 {case_id}"
-    if "project nova" in text or re.search(r"\bnova\b", text):
-        return "project:NOVA", "PROJECT", "Project NOVA", "Project NOVA 项目"
-    course = re.search(r"\b((?:PE|AX)\d{4})\b", text, re.I)
+    subject = str(email.get("subject") or "")
+    project = re.search(r"\bProject\s+([A-Z][A-Za-z0-9-]{1,30})\b", subject)
+    if project:
+        name = project.group(1).upper()
+        return f"project:{name}", "PROJECT", f"Project {name}", f"Project {name} 项目"
+    course = re.search(r"\b([A-Z]{2,4}\d{4})\b", text, re.I)
     if course:
         code = course.group(1).upper()
         return f"course:{code}", "COURSE", f"{code} course updates", f"{code} 课程动态"
     if any(word in text for word in ("showmeyouragent", "show me your agent", "smya hackathon", "questbond")):
         return "project:showmeyouragent", "PROJECT", "ShowMeYourAgent hackathon", "ShowMeYourAgent 黑客松"
-    if "responsible ai roundtable" in text:
-        return "event:responsible-ai-roundtable", "EVENT", "Responsible AI roundtable", "负责任 AI 圆桌会议"
+    if intent == "MEETING_CALENDAR":
+        subject = str(email.get("subject") or "")
+        subject = subject.rsplit(":", 1)[-1].strip()
+        event = re.search(
+            r"(?:invitation:\s*)?([A-Za-z][A-Za-z0-9&'-]*(?:\s+[A-Za-z][A-Za-z0-9&'-]*){0,4}\s+"
+            r"(?:roundtable|seminar|workshop|webinar|conference))\b",
+            subject,
+            re.I,
+        )
+        if event:
+            title = event.group(1).strip()
+            key = _slug(title)
+            return f"event:{key}", "EVENT", title, f"{title} 活动"
     if any(word in text for word in ("subscription", "renew", "billing cycle", "trial", "订阅", "续订", "试用期")):
         if "google one" in text:
             organization = "Google One"
         elif "chatgpt" in text or "openai" in text:
             organization = "ChatGPT Plus"
         else:
-            organization = _entity(analysis, {"ORGANIZATION", "PROJECT"}) or "Subscriptions"
-        key = organization if organization in {"CloudNotes", "Agent Systems Weekly"} else re.sub(r"[^a-z0-9]+", "-", organization.lower()).strip("-") or "general"
+            organization = _subscription_organization(email, analysis)
+        key = organization if organization != "Subscriptions" else "general"
         return f"subscription:{key}", "SUBSCRIPTION", f"{organization} subscription", f"{organization} 订阅"
     if email.get("intent") == "NEWSLETTER":
-        organization = _entity(analysis, {"ORGANIZATION", "PROJECT"}) or "Newsletters"
-        key = organization if organization == "Agent Systems Weekly" else re.sub(r"[^a-z0-9]+", "-", organization.lower()).strip("-") or "general"
+        organization = _subscription_organization(email, analysis)
+        key = organization if organization != "Subscriptions" else "general"
         return f"subscription:{key}", "SUBSCRIPTION", f"{organization} updates", f"{organization} 资讯订阅"
     if (email.get("intent") == "SECURITY_ALERT"):
         if "google" in text:

@@ -5,13 +5,14 @@ import uuid
 from app import config, db, llm
 
 
-def _terms(text):
+def _terms(text, expand=False):
     lowered = (text or "").lower()
     words = set(re.findall(r"[a-z0-9]{2,}", lowered))
     stopwords = {
         "the", "and", "for", "from", "with", "what", "which", "does", "mailbox",
         "email", "emails", "about", "into", "have", "has", "had", "are", "was",
         "were", "that", "this", "your", "you", "say", "current", "please",
+        "in", "is", "did", "do", "one", "needs",
     }
     words.difference_update(stopwords)
     expansions = {
@@ -19,13 +20,15 @@ def _terms(text):
         "subscription": {"renew", "renewal", "plan", "billing"},
         "done": {"submitted", "received", "complete", "action", "further"},
         "remains": {"action", "submit", "submitted", "received", "deadline", "further"},
+        "still": {"remains", "nothing", "needed", "received", "deadline", "further"},
         "changed": {"change", "moved", "extended", "updated", "venue", "from", "to"},
         "deliverables": {"requirements", "submit", "repository", "video", "report", "files"},
         "deadline": {"due", "close", "closes", "submit"},
         "deadlines": {"due", "close", "closes", "registration", "applications"},
     }
-    for term in tuple(words):
-        words.update(expansions.get(term, set()))
+    if expand:
+        for term in tuple(words):
+            words.update(expansions.get(term, set()))
     cjk = "".join(re.findall(r"[\u4e00-\u9fff]", lowered))
     words.update(cjk[i:i + 2] for i in range(max(0, len(cjk) - 1)))
     return {word for word in words if word}
@@ -34,12 +37,12 @@ def _terms(text):
 def _identifiers(text):
     """Extract explicit identifiers that should behave as hard retrieval filters."""
     value = (text or "").upper()
-    pattern = r"(?<![A-Z0-9])(?:(?:PE|AX)\d{4}|(?:INC\d{5,}|(?:CS|SEC)-\d{4,})|(?=[A-Z0-9]{6,}(?![A-Z0-9]))(?=[A-Z0-9]*\d)[A-Z0-9]+)(?![A-Z0-9])"
+    pattern = r"(?<![A-Z0-9])(?:[A-Z]{2,4}\d{4}|(?:INC\d{5,}|(?:CS|SEC)-\d{4,})|(?=[A-Z0-9]{6,}(?![A-Z0-9]))(?=[A-Z0-9]*\d)[A-Z0-9]+)(?![A-Z0-9])"
     return set(re.findall(pattern, value))
 
 
 def retrieve(question, limit=6, topic_id=None):
-    query_terms = _terms(question)
+    query_terms = _terms(question, expand=True)
     identifiers = _identifiers(question)
     candidates = db.list_knowledge_chunks(topic_id=topic_id)
     subscription_query = bool({"subscription", "subscriptions", "renew", "renewal"} & _terms(question))
@@ -75,6 +78,8 @@ def retrieve(question, limit=6, topic_id=None):
         floor = 0.08
     elif roundtable_query and "changed" in _terms(question):
         floor = max(0.1, scored[0][0] * 0.3)
+    elif identifiers:
+        floor = max(0.2, scored[0][0] * 0.85)
     else:
         relative_floor = 0.52 if "deadlines" in _terms(question) else 0.68
         floor = max(0.2, scored[0][0] * relative_floor)

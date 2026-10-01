@@ -7,6 +7,13 @@ from app import db, topics
 
 
 class TopicTests(unittest.TestCase):
+    def test_unseen_course_project_event_and_subscription_names_are_generic(self):
+        empty = {"labels_json": "[]", "entities_json": "[]"}
+        self.assertEqual("course:DS5301", topics.classify({"subject": "DS5301 capstone", "intent": "EDUCATION_NOTICE"}, empty)[0])
+        self.assertEqual("project:ORION", topics.classify({"subject": "Project ORION review", "intent": "PROJECT_UPDATE"}, empty)[0])
+        self.assertEqual("event:data-ethics-seminar", topics.classify({"subject": "Data Ethics seminar is now online", "intent": "MEETING_CALENDAR"}, empty)[0])
+        self.assertEqual("subscription:TaskFlow", topics.classify({"subject": "TaskFlow annual plan renews", "sender": "billing@taskflow.example.com", "intent": "PAYMENT_BILLING"}, empty)[0])
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.db_patch = patch("app.config.DB_PATH", Path(self.tmp.name) / "topics.db")

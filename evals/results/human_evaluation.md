@@ -75,3 +75,7 @@ For the report, the defensible claim is: **“The tuned deterministic layer achi
 | Targeted metrics and reached metrics | Baseline/final comparison, frozen holdout, and human score | Present, but model-backed metrics remain missing |
 
 This checklist should be updated again immediately before submission.
+
+## Post-review engineering note
+
+The first holdout was kept unchanged. General topic extraction and unsupported-query filtering were subsequently improved and recorded separately in `holdout_after_fix.*`. That rerun reaches 100% topic-key accuracy and unsupported-question abstention, while strict RAG source-set accuracy remains 80% because one multi-email course-status question omits necessary evidence. Since the holdout informed these changes, the 71/100 human score is intentionally unchanged pending a second unseen set.
