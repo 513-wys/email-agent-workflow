@@ -1,76 +1,125 @@
 # AI Email Agent
 
-A bilingual, privacy-aware email workflow that turns an inbox into a traceable workspace. The application synchronizes Gmail or NetEase mail, evaluates security risk, classifies messages, extracts action items, organizes related emails into knowledge topics, and answers cross-email questions with source citations.
+[Live course demo](https://email-agent-workflow.onrender.com/) · [Final report](FINAL_REPORT.md) · [Evaluation results](evals/results/metrics_summary.md) · [Architecture](ARCHITECTURE.md) · [Security and privacy](SECURITY_PRIVACY.md)
 
-The project is built with Python, Flask, SQLite, IMAP, and either DeepSeek or a local Ollama model. English is the default course-delivery language; Chinese is available throughout the interface.
+AI Email Agent is a bilingual, privacy-aware workflow that turns a crowded inbox into a traceable workspace. It imports email, checks security risk, classifies and summarizes messages, extracts action items, groups related messages into knowledge topics, creates a daily digest, and answers cross-email questions with links to the supporting messages.
 
-## What it demonstrates
+The repository contains a safe 20-email public demonstration, the local/full product implementation, synthetic data, executable evaluations, saved results, tests, deployment configuration, and the course report.
 
-- Reliable incremental IMAP synchronization without changing read status
-- Forwarded-message normalization and original-sender recovery
-- Deterministic security checks before model processing
-- Multidimensional classification, priority, summaries, deadlines, and actions
-- A local email knowledge index with stable content hashing and chunking
-- Cross-email topic organization and cited retrieval-augmented answers
-- Direct navigation back to the corresponding Gmail message when an exact thread ID is available
-- A permanent welcome screen, onboarding import progress, dashboard, actions, knowledge, digest, and settings surfaces
+## Reviewer quick path
 
-## Deployment modes
+For the fastest review:
 
-The repository supports two deliberately separated modes:
+1. Open the [live demo](https://email-agent-workflow.onrender.com/). Its prefilled email and API fields are fictional and are never submitted to a mailbox or model.
+2. Try the dashboard, email details, actions, knowledge topics, cited questions, daily digest, language switch, and simulated “open original email” flow.
+3. Read the [≤1,200-word final report](FINAL_REPORT.md) for the problem, business/technical trade-offs, critique, difficulties, tuning, results, and future path.
+4. Inspect the [20 transparent synthetic emails](fixtures/demo_email_cases.json) and their [data explainer](fixtures/README.md).
+5. Review the [evaluation explainer](evals/README.md), [metric summary](evals/results/metrics_summary.md), and saved [real-DeepSeek results](evals/results/model_evaluation.md).
+6. Run the Docker demo and automated tests using the commands below.
 
-| Mode | Data | Mailbox access | External model |
-| --- | --- | --- | --- |
-| Personal local mode | Your local mailbox data | Optional, configured locally | DeepSeek or Ollama |
-| Public course demo | Curated synthetic messages using reserved example domains | Disabled | Disabled |
-| Hosted multi-user mode | Separate workspace database for each account | Each user supplies their own mailbox credential | Each user supplies their own DeepSeek key |
+## Problem and product definition
 
-Set `PUBLIC_DEMO=true` for a shareable deployment. Visitors first see a display-only setup form prefilled with fictional email and API values. Submitting it stores nothing and opens a synthetic workspace. Public demo mode hides account settings, disables mailbox synchronization and action mutations, and uses an extractive local answer path. It never needs a mailbox credential or API key.
+Important information is fragmented across individual emails. A user must repeatedly scan threads, reconcile updates, remember deadlines, separate optional information from real actions, and reopen Gmail to verify the source. This project tests whether a small, user-controlled agent can reduce that work without hiding evidence or taking irreversible actions.
 
-Set `MULTI_USER_MODE=true` and `PUBLIC_DEMO=false` for the hosted application. Visitors register before they can access any workspace route. Account passwords are salted and hashed; mailbox credentials and DeepSeek keys are encrypted before storage; email, actions, knowledge, sync cursors, and settings live in a separate database per account. The hosted prototype uses Gmail/NetEase app passwords rather than collecting the user's normal sign-in password.
+### Persona
 
-Never commit `.env`, `data/`, or a SQLite database. They are excluded by both `.gitignore` and `.dockerignore`.
+The primary persona is a student or knowledge worker managing course, project, subscription, security, support, career, and event email across one or more accounts. They want concise decisions and reminders, but still need to inspect the original evidence. They may prefer a cloud model for convenience or a local model for privacy.
 
-## Architecture
+### Inputs and outputs
 
-```text
-IMAP / demo fixture
-       │
-       ▼
-Security gate → Triage → Action extraction
-       │                    │
-       ▼                    ▼
-  SQLite audit log      Action workspace
-       │
-       ▼
-Incremental knowledge chunks → Topic organization → Local retrieval → Cited answer
+| Inputs | Processing | Outputs |
+| --- | --- | --- |
+| Gmail or NetEase messages via read-only IMAP; forwarded Outlook messages; or the synthetic fixture | Normalization, sender recovery, deterministic security gate, model triage, action extraction, indexing, topic grouping, local retrieval and bounded generation | Prioritized email list, bilingual summaries, actions and deadlines, topic pages, cited cross-email answers, daily digest, and original-message links |
+
+The application does **not** send, delete, archive, or automatically reply to email.
+
+## Main capabilities
+
+- Incremental IMAP synchronization using stable provider UIDs without changing read status
+- Forwarded-message parsing and recovery of the original sender
+- Deterministic quarantine checks before any model analysis
+- Intent, priority, action, deadline, English summary, and Chinese summary extraction
+- Idempotent action creation and status tracking
+- Stable local email/chunk indexing and related-message topic organization
+- Cross-email retrieval and answers with numbered, openable source citations
+- Gmail navigation when an exact thread ID is available
+- English-first course UI with a full Chinese language switch
+- Welcome/onboarding import flow with progress, dashboard, email detail, actions, knowledge, digest, and settings
+- Separate local, public-demo, and authenticated multi-user modes
+
+## High-level architecture
+
+```mermaid
+flowchart LR
+    A[IMAP mailbox or synthetic fixture] --> B[Normalize and deduplicate]
+    B --> C[Deterministic security gate]
+    C -->|safe| D[DeepSeek or local Ollama triage]
+    C -->|unsafe| E[Quarantine]
+    D --> F[(Per-user SQLite workspace)]
+    F --> G[Actions and daily digest]
+    F --> H[Chunk index and topic grouping]
+    H --> I[Local retrieval]
+    I --> J[Cited answer]
+    F --> K[Flask bilingual UI]
 ```
 
-Key modules:
+Security-critical and state-critical operations—authentication, synchronization, UID deduplication, quarantine thresholds, database writes, retrieval boundaries, and links—remain deterministic. The model handles language understanding and generation. See [ARCHITECTURE.md](ARCHITECTURE.md) for module boundaries and data flow, [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md) for stored structures, and [schemas/email_agent_contracts.schema.json](schemas/email_agent_contracts.schema.json) for contracts.
 
-- `app/email_client.py` — read-only IMAP and incremental UID synchronization
-- `app/security.py` — deterministic risk signals and quarantine decision
-- `app/triage.py` — validated structured model output
-- `app/actions.py` — idempotent action-item generation
-- `app/knowledge.py` — stable local document and chunk indexing
-- `app/topics.py` — deterministic cross-email topic organization
-- `app/rag.py` — local retrieval, bounded context, answers, and citations
-- `app/main.py` — Flask routes and bilingual server-rendered UI
-- `app/auth.py` — hosted account registration, password verification, and CSRF tokens
-- `app/tenant.py` — request/background-job workspace isolation
-- `app/demo_seed.py` — synthetic public-demo dataset
+## Evaluation and actual results
 
-More detail is available in [ARCHITECTURE.md](ARCHITECTURE.md), [SECURITY_PRIVACY.md](SECURITY_PRIVACY.md), and [docs/THREE_DAY_EXECUTION_BASELINE.md](docs/THREE_DAY_EXECUTION_BASELINE.md).
+The project deliberately separates known-set regression, held-out evaluation, live-deployment validation, and model-backed evaluation. A 100% regression score is **not** presented as production accuracy.
 
-## Run the safe demo with Docker
+| Evaluation | Actual result |
+| --- | --- |
+| Fixed 20-email regression | 100% deterministic product checks on the known development set |
+| First frozen 10-email holdout | Topic key 10%; retrieval precision 87.5%, recall 100%, exact source set 80%; unsupported-question abstention 0% |
+| Known holdout after fixes | Topic key 100%; retrieval precision 100%, recall 85.7%, exact source set 80%; abstention 100%—reported only as regression, not independent evidence |
+| Real DeepSeek triage on synthetic mail | Intent 89.5%; priority 73.7%; action decision 79.0%; exact deadline 73.7%; API success 100% |
+| Real DeepSeek cross-email answers | Exact source sets 100%; 6/10 fully acceptable; author semantic score 79%; one material security contradiction |
+| Performance | Triage median/P95 1.723/2.154 s; answer median/P95 40.894/51.896 s |
+| Automated software tests | 41 passed |
+
+Targets and reached values, including failed targets, are in [evals/results/metrics_summary.md](evals/results/metrics_summary.md). Raw model predictions and answers are preserved in [model_evaluation.json](evals/results/model_evaluation.json); the question-by-question semantic review is in [model_answer_human_review.md](evals/results/model_answer_human_review.md). The semantic review is author-scored and is not represented as an independent human study.
+
+### Where to find evaluation evidence
+
+| Evidence | Location |
+| --- | --- |
+| Evaluation design and commands | [evals/README.md](evals/README.md) |
+| Human scoring rubric | [evals/HUMAN_EVAL_RUBRIC.md](evals/HUMAN_EVAL_RUBRIC.md) |
+| 20 visible demo cases and gold labels | [fixtures/demo_email_cases.json](fixtures/demo_email_cases.json) |
+| Frozen unseen email cases | [fixtures/holdout_email_cases.json](fixtures/holdout_email_cases.json) |
+| Cross-email QA cases | [evals/demo_qa_cases.json](evals/demo_qa_cases.json) |
+| Frozen unseen QA cases | [evals/holdout_qa_cases.json](evals/holdout_qa_cases.json) |
+| Baseline/final deterministic comparison | [evals/results/comparison.md](evals/results/comparison.md) |
+| Original untouched holdout result | [evals/results/holdout.md](evals/results/holdout.md) |
+| Post-fix known-holdout regression | [evals/results/holdout_after_fix.md](evals/results/holdout_after_fix.md) |
+| Live Render validation | [evals/results/live_demo_validation.md](evals/results/live_demo_validation.md) |
+| Real-model metrics and failures | [evals/results/model_evaluation.md](evals/results/model_evaluation.md) |
+
+## Run the safe demo
+
+The simplest reproducible route uses Docker and requires no mailbox or API credentials:
 
 ```bash
+git clone https://github.com/513-wys/email-agent-workflow.git
+cd email-agent-workflow
 docker compose up --build
 ```
 
-Open <http://127.0.0.1:8000>. Docker starts the application with `PUBLIC_DEMO=true`; no secrets are required.
+Open <http://127.0.0.1:8000>. Docker enables `PUBLIC_DEMO=true`, seeds the 20 fictional emails, disables external mailbox/model calls, and presents a read-only product walkthrough.
 
-## Run locally for personal use
+Without Docker:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+PUBLIC_DEMO=true DEMO_MODE=true python run.py
+```
+
+## Run the personal version
 
 ```bash
 python3 -m venv .venv
@@ -80,55 +129,101 @@ cp .env.example .env
 python run.py
 ```
 
-Open <http://127.0.0.1:8000>, connect a mailbox with an app password, and choose the size of the first import. Credentials and email content stay in the ignored local SQLite database. If DeepSeek is configured, selected email content is sent to that API for analysis. Without a DeepSeek key, the application uses the configured local Ollama service.
+Then open <http://127.0.0.1:8000>, select Gmail or NetEase, enter an app-specific mailbox password, choose the first-import limit, and configure either a DeepSeek API key or local Ollama. Do not use a normal mailbox password. DeepSeek mode sends the selected email content to DeepSeek; Ollama keeps model inference local.
 
-## Configuration
+The full variable list and safe placeholders are in [.env.example](.env.example). Important production values include `APP_SECRET_KEY`, `APP_ENCRYPTION_KEY`, and `COOKIE_SECURE=true`. Never commit `.env`, `data/`, credentials, or SQLite databases; they are ignored by Git and Docker.
 
-The checked-in `.env.example` contains empty placeholders only.
+## Run tests and evaluations
 
-| Variable | Purpose | Public demo value |
-| --- | --- | --- |
-| `PUBLIC_DEMO` | Enforces synthetic read-only deployment behavior | `true` |
-| `MULTI_USER_MODE` | Requires accounts and isolates hosted workspaces | `false` |
-| `APP_SECRET_KEY` | Signs browser sessions; use a long random production value | unset |
-| `APP_ENCRYPTION_KEY` | Encrypts each user's mailbox credential and model key | unset |
-| `COOKIE_SECURE` | Sends hosted session cookies only over HTTPS | `false` locally |
-| `DEMO_MODE` | Uses demo rather than IMAP fetch behavior | `true` |
-| `DEEPSEEK_API_KEY` | Optional personal cloud-model key | unset |
-| `OLLAMA_BASE_URL` | Optional local model endpoint | unset in cloud demo |
-| `IMAP_USER` / `IMAP_PASSWORD` | Optional personal mailbox connection | unset |
-| `HOST` / `PORT` | Local server binding | `0.0.0.0` / `8000` in Docker |
-
-## Tests
+Install the test runner if it is not already available, then execute:
 
 ```bash
-python -m unittest discover -s tests -v
+pip install pytest
+PYTHONPATH=. pytest -q
 ```
 
-The regression suite covers migrations, incremental synchronization, forwarded senders, Gmail links, triage validation, action idempotency, knowledge indexing, topic grouping, retrieval precision, bilingual UI behavior, and public-demo isolation.
+Deterministic and held-out evaluations do not call an external model:
 
-## Deploy on Render
+```bash
+PYTHONPATH=. python evals/run_baseline.py
+PYTHONPATH=. python evals/run_final.py
+PYTHONPATH=. python evals/run_holdout.py
+PYTHONPATH=. python evals/run_holdout_after_fix.py
+```
 
-The included `render.yaml` and `Dockerfile` define the safe public course demo:
+The model-backed run uses only synthetic email content, but it calls the configured DeepSeek API and may incur provider usage:
 
-1. Push this repository to GitHub.
-2. In Render, create a new Blueprint and select the repository.
-3. Render reads `render.yaml`, builds the Docker image, and exposes `/health` for health checks.
-4. Visitors enter through a fictional, prefilled setup screen. The submitted display values are ignored; no mailbox or external model is contacted.
+```bash
+PYTHONPATH=. python evals/run_model_evaluation.py
+```
 
-To deploy the authenticated multi-user mode instead, set `PUBLIC_DEMO=false`, `DEMO_MODE=false`, and `MULTI_USER_MODE=true`, then provide persistent encrypted storage before inviting real users.
+## Deployment modes and privacy boundary
 
-Render's free service may sleep when inactive and take a short time to wake up.
+| Mode | Mailbox and data | Model behavior | Intended use |
+| --- | --- | --- | --- |
+| Public course demo | 20 synthetic messages; mailbox access disabled | Checked-in reproducible answers; external model disabled | Safe assessment and product walkthrough |
+| Personal local | User's local workspace; optional Gmail/NetEase IMAP | Personal DeepSeek key or local Ollama | Individual use and development |
+| Hosted multi-user | Authentication plus separate workspace database per account | Each user supplies their own encrypted credentials | Prototype only; needs durable managed storage before production |
 
-## Privacy boundary
+Passwords are salted and hashed. Mailbox app passwords and DeepSeek keys are encrypted at rest and never displayed back to the browser. Public-demo values are ignored rather than stored. See [SECURITY_PRIVACY.md](SECURITY_PRIVACY.md) for threat boundaries and remaining risks.
 
-- The application never sends or replies to email automatically.
-- Public demo mode cannot connect to a mailbox or edit account settings.
-- Hosted mode requires authentication and uses a separate workspace database per user.
-- Mailbox credentials and DeepSeek keys are encrypted at rest and never shown back to the browser.
-- Runtime databases and secrets are excluded from Git and Docker build context.
-- The public fixture uses only synthetic content and reserved example domains.
-- The free Render filesystem is ephemeral. A production deployment must attach persistent encrypted storage or migrate workspaces to a managed database before promising durable retention.
+## Repository guide
+
+| Path | Purpose |
+| --- | --- |
+| `app/main.py` | Flask routes, authentication gates, and bilingual UI orchestration |
+| `app/email_client.py`, `forwarded_mail.py` | IMAP sync, normalization, and original-sender recovery |
+| `app/security.py`, `triage.py`, `actions.py` | Safety gate, structured model analysis, and idempotent actions |
+| `app/knowledge.py`, `topics.py`, `rag.py` | Indexing, topic organization, retrieval, generation, and citations |
+| `app/auth.py`, `tenant.py`, `settings_store.py` | Accounts, per-user isolation, and encrypted settings |
+| `app/demo_seed.py`, `demo_answers.py` | Reproducible public-demo data and answers |
+| `app/templates/`, `app/static/` | Responsive English/Chinese interface |
+| `fixtures/` | Synthetic development and frozen holdout email data |
+| `evals/` | Evaluation datasets, runners, rubric, saved results, and explanation |
+| `tests/` | Automated unit and integration regression tests |
+| `Dockerfile`, `compose.yaml`, `render.yaml` | Local container and Render deployment |
+| `PRODUCT.md`, `ARCHITECTURE.md`, `DESIGN.md` | Detailed product, technical, and visual-design decisions |
+| `FINAL_REPORT.md` | Course report within the requested word limit |
+
+Every Python application module includes a module-level description so a human reviewer or coding agent can scan responsibilities without reading every line.
+
+## Trade-offs and known limitations
+
+- IMAP app passwords reduced prototype integration time, but OAuth would provide better onboarding and credential control.
+- SQLite keeps local deployment simple, but Render's free filesystem is ephemeral; a real hosted service needs durable encrypted storage or a managed database.
+- Lexical retrieval is inspectable and effective for exact identifiers, but is less robust than hybrid lexical/vector retrieval on paraphrases.
+- The curated demo is reproducible but small and English-only. The first holdout exposed overfitting, and there is no second untouched multilingual holdout.
+- The real-model run found incomplete answers, a security-alert contradiction, and slow QA latency. These failures are retained in the results rather than hidden.
+- Attachments, provider OAuth, native Outlook/Microsoft Graph, cost telemetry, user corrections, and a production security audit remain future work.
+
+The full business and technical critique is in [FINAL_REPORT.md](FINAL_REPORT.md).
+
+## Course-deliverable checklist
+
+| Requirement | Repository evidence | Status |
+| --- | --- | --- |
+| Problem statement | This README and [PRODUCT.md](PRODUCT.md) | Complete |
+| Business and technical trade-off analysis, ≤1,200 words | [FINAL_REPORT.md](FINAL_REPORT.md), approximately 1,067 words | Complete |
+| Working code in GitHub | Application, Docker setup, tests, and deployment configuration | Complete |
+| Transparent data plus explainer | `fixtures/*.json` and [fixtures/README.md](fixtures/README.md) | Complete |
+| Transparent evals plus explainer | `evals/*.json`, runners, [evals/README.md](evals/README.md), and saved results | Complete |
+| Run instructions | Safe demo, personal mode, tests, and evaluations above | Complete |
+| Legible module-level code documentation | Module docstrings and repository guide above | Complete |
+| Persona, input, output, architecture | Sections above plus [ARCHITECTURE.md](ARCHITECTURE.md) | Complete |
+| Metrics targeted and reached | [evals/results/metrics_summary.md](evals/results/metrics_summary.md) | Complete |
+| Recorded demo, face and screen visible, 5 ± 3 minutes | Video and final link | Pending |
+| Final privacy/submission audit | Planned after the video materials are added | Pending |
+
+## Current completion sequence
+
+1. Safe Render demonstration — complete
+2. Twenty representative synthetic emails — complete
+3. Knowledge, QA, actions, and digest validation — complete
+4. Evals and actual metrics — complete
+5. README, product documentation, and architecture entry point — complete in this revision
+6. English report — complete early
+7. Concise 5 ± 3 minute video script and recording plan — next
+8. Final privacy, repository, deployment, and submission audit — pending
 
 ## License
 
