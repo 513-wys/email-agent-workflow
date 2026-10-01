@@ -378,7 +378,7 @@ def get_topic(topic_id):
 
 def list_knowledge_chunks(topic_id=None):
     conn = _conn()
-    sql = """SELECT c.id,c.chunk_index,c.text,d.title,d.source_url,CAST(d.source_id AS INTEGER) email_id,e.sender,e.received_at
+    sql = """SELECT c.id,c.chunk_index,c.text,d.title,d.source_url,CAST(d.source_id AS INTEGER) email_id,e.sender,e.received_at,e.intent,e.priority
              FROM knowledge_chunks c JOIN knowledge_documents d ON d.id=c.document_id
              JOIN emails e ON e.id=CAST(d.source_id AS INTEGER)"""
     args = []

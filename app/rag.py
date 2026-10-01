@@ -8,6 +8,24 @@ from app import config, db, llm
 def _terms(text):
     lowered = (text or "").lower()
     words = set(re.findall(r"[a-z0-9]{2,}", lowered))
+    stopwords = {
+        "the", "and", "for", "from", "with", "what", "which", "does", "mailbox",
+        "email", "emails", "about", "into", "have", "has", "had", "are", "was",
+        "were", "that", "this", "your", "you", "say", "current", "please",
+    }
+    words.difference_update(stopwords)
+    expansions = {
+        "subscriptions": {"subscription", "renew", "renewal", "plan", "billing", "newsletter"},
+        "subscription": {"renew", "renewal", "plan", "billing"},
+        "done": {"submitted", "received", "complete", "action", "further"},
+        "remains": {"action", "submit", "submitted", "received", "deadline", "further"},
+        "changed": {"change", "moved", "extended", "updated", "venue", "from", "to"},
+        "deliverables": {"requirements", "submit", "repository", "video", "report", "files"},
+        "deadline": {"due", "close", "closes", "submit"},
+        "deadlines": {"due", "close", "closes", "registration", "applications"},
+    }
+    for term in tuple(words):
+        words.update(expansions.get(term, set()))
     cjk = "".join(re.findall(r"[\u4e00-\u9fff]", lowered))
     words.update(cjk[i:i + 2] for i in range(max(0, len(cjk) - 1)))
     return {word for word in words if word}
@@ -16,7 +34,7 @@ def _terms(text):
 def _identifiers(text):
     """Extract explicit identifiers that should behave as hard retrieval filters."""
     value = (text or "").upper()
-    pattern = r"(?<![A-Z0-9])(?:PE\d{4}|INC\d{5,}|(?=[A-Z0-9]{6,}(?![A-Z0-9]))(?=[A-Z0-9]*\d)[A-Z0-9]+)(?![A-Z0-9])"
+    pattern = r"(?<![A-Z0-9])(?:(?:PE|AX)\d{4}|(?:INC\d{5,}|(?:CS|SEC)-\d{4,})|(?=[A-Z0-9]{6,}(?![A-Z0-9]))(?=[A-Z0-9]*\d)[A-Z0-9]+)(?![A-Z0-9])"
     return set(re.findall(pattern, value))
 
 
@@ -24,21 +42,42 @@ def retrieve(question, limit=6, topic_id=None):
     query_terms = _terms(question)
     identifiers = _identifiers(question)
     candidates = db.list_knowledge_chunks(topic_id=topic_id)
+    subscription_query = bool({"subscription", "subscriptions", "renew", "renewal"} & _terms(question))
+    career_query = bool({"career", "opportunities"} & _terms(question))
+    roundtable_query = "roundtable" in _terms(question)
+    identifier_in_title = identifiers and any(
+        identifiers.issubset(_identifiers(row.get("title") or "")) for row in candidates
+    )
     scored = []
     for row in candidates:
         searchable = " ".join((row.get("title") or "", row.get("text") or ""))
         if identifiers and not identifiers.issubset(_identifiers(searchable)):
             continue
+        if identifier_in_title and not identifiers.issubset(_identifiers(row.get("title") or "")):
+            continue
+        if subscription_query and row.get("intent") not in {"NEWSLETTER", "PAYMENT_BILLING"}:
+            continue
+        if career_query and "career" not in (row.get("sender") or "").lower():
+            continue
+        if roundtable_query and "roundtable" not in searchable.lower():
+            continue
         text_terms = _terms(searchable)
-        score = len(query_terms & text_terms) / max(1, len(query_terms))
+        overlap = query_terms & text_terms
+        score = len(overlap) / max(1, len(query_terms))
         if identifiers:
-            score += 1.0
+            score += 0.2
         if score:
             scored.append((score, row))
     scored.sort(key=lambda pair: (pair[0], pair[1]["id"]), reverse=True)
     if not scored:
         return []
-    floor = max(0.12, scored[0][0] * 0.45)
+    if subscription_query:
+        floor = 0.08
+    elif roundtable_query and "changed" in _terms(question):
+        floor = max(0.1, scored[0][0] * 0.3)
+    else:
+        relative_floor = 0.52 if "deadlines" in _terms(question) else 0.68
+        floor = max(0.2, scored[0][0] * relative_floor)
     grouped = {}
     for score, row in scored:
         if score < floor:

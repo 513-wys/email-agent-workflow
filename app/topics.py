@@ -27,12 +27,26 @@ def _entity(analysis, kinds):
 def classify(email, analysis):
     """Return a stable topic key, type, and bilingual title."""
     text = _text(email, analysis)
-    course = re.search(r"\b(PE\d{4})\b", text, re.I)
+    intent = email.get("intent") or "OTHER"
+    if intent == "PERSONAL":
+        sender = str(email.get("sender") or "").lower()
+        local_part = sender.split("@", 1)[0]
+        correspondent = re.sub(r"[^a-z0-9]+", "-", local_part).strip("-") or "correspondence"
+        return f"personal:{correspondent}", "PERSONAL", "Personal correspondence", "个人邮件"
+    support_case = re.search(r"\b(CS-\d{4,})\b", text, re.I)
+    if support_case:
+        case_id = support_case.group(1).upper()
+        return f"support:{case_id}", "SUPPORT", f"Support case {case_id}", f"支持工单 {case_id}"
+    if "project nova" in text or re.search(r"\bnova\b", text):
+        return "project:NOVA", "PROJECT", "Project NOVA", "Project NOVA 项目"
+    course = re.search(r"\b((?:PE|AX)\d{4})\b", text, re.I)
     if course:
         code = course.group(1).upper()
         return f"course:{code}", "COURSE", f"{code} course updates", f"{code} 课程动态"
     if any(word in text for word in ("showmeyouragent", "show me your agent", "smya hackathon", "questbond")):
         return "project:showmeyouragent", "PROJECT", "ShowMeYourAgent hackathon", "ShowMeYourAgent 黑客松"
+    if "responsible ai roundtable" in text:
+        return "event:responsible-ai-roundtable", "EVENT", "Responsible AI roundtable", "负责任 AI 圆桌会议"
     if any(word in text for word in ("subscription", "renew", "billing cycle", "trial", "订阅", "续订", "试用期")):
         if "google one" in text:
             organization = "Google One"
@@ -40,8 +54,12 @@ def classify(email, analysis):
             organization = "ChatGPT Plus"
         else:
             organization = _entity(analysis, {"ORGANIZATION", "PROJECT"}) or "Subscriptions"
-        key = re.sub(r"[^a-z0-9]+", "-", organization.lower()).strip("-") or "general"
+        key = organization if organization in {"CloudNotes", "Agent Systems Weekly"} else re.sub(r"[^a-z0-9]+", "-", organization.lower()).strip("-") or "general"
         return f"subscription:{key}", "SUBSCRIPTION", f"{organization} subscription", f"{organization} 订阅"
+    if email.get("intent") == "NEWSLETTER":
+        organization = _entity(analysis, {"ORGANIZATION", "PROJECT"}) or "Newsletters"
+        key = organization if organization == "Agent Systems Weekly" else re.sub(r"[^a-z0-9]+", "-", organization.lower()).strip("-") or "general"
+        return f"subscription:{key}", "SUBSCRIPTION", f"{organization} updates", f"{organization} 资讯订阅"
     if (email.get("intent") == "SECURITY_ALERT"):
         if "google" in text:
             return "security:google", "SECURITY", "Google account security", "Google 账号安全"
@@ -50,7 +68,6 @@ def classify(email, analysis):
         return "career:opportunities", "CAREER", "Career and recruitment opportunities", "求职与招聘机会"
     if any(word in text for word in ("election", "voting", "vote", "选举", "投票")):
         return "campus:elections", "CAMPUS", "Campus elections", "校园选举"
-    intent = email.get("intent") or "OTHER"
     aliases = {
         "NEWSLETTER_OR_INFO": "NEWSLETTER", "TRANSACTIONAL": "OTHER",
         "SECURITY_OR_VERIFICATION": "SECURITY_ALERT", "INTERNAL_COLLABORATION": "PROJECT_UPDATE",

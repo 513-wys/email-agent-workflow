@@ -105,7 +105,7 @@ def run():
                 actions.sync(email_id, analysis)
             if analysis["action_items"] and case["expected"].get("requires_action"):
                 expected_action_ids.add(case["id"])
-            predicted_topic = topics.classify(record, {
+            predicted_topic = None if not record["is_safe"] else topics.classify(record, {
                 "labels_json": json.dumps(analysis["labels"]),
                 "entities_json": json.dumps(analysis["entities"]),
             })[0]
@@ -171,12 +171,12 @@ def run():
         }
 
 
-def markdown(result):
+def markdown(result, title="Offline Baseline Results", interpretation=None):
     m = result["metrics"]
     misses = [row for row in result["topic_cases"] if not row["correct"]]
     qa_misses = [row for row in result["qa_cases"] if not row["pass"]]
     lines = [
-        "# Offline Baseline Results", "",
+        f"# {title}", "",
         f"Dataset: `{result['dataset_id']}`  ",
         f"Run type: {result['run_type']}", "",
         "## Metrics", "",
@@ -190,7 +190,7 @@ def markdown(result):
     lines.append(f"- Action false negatives: {', '.join(result['action_errors']['false_negative']) or 'none'}")
     lines.append(f"- Strict RAG source-set failures: {len(qa_misses)} — " + ", ".join(row["id"] for row in qa_misses))
     lines.extend(["", "## Interpretation", "",
-        "This is a deliberately honest baseline. It shows how the current deterministic product layer behaves before rules are tuned for the new 20-message dataset. Model-backed classification and answer-quality evaluation remain a separate next step.",
+        interpretation or "This is a deliberately honest baseline. It shows how the current deterministic product layer behaves before rules are tuned for the new 20-message dataset. Model-backed classification and answer-quality evaluation remain a separate next step.",
         "", "## Limitations", ""])
     lines.extend(f"- {item}" for item in result["limitations"])
     return "\n".join(lines) + "\n"

@@ -14,7 +14,15 @@ def _fingerprint(title):
 def sync(email_id, analysis):
     """Upsert system-generated actions without overwriting user decisions."""
     email = db.get_email(email_id) or {}
-    if topics.is_subscription(email, analysis):
+    # Informational subscription mail should not clutter the action list. A concrete,
+    # high-priority billing failure with evidence is still a real action.
+    actionable_subscription = (
+        analysis.get("intent") == "PAYMENT_BILLING"
+        and analysis.get("requires_action")
+        and analysis.get("priority") in {"P0_CRITICAL", "P1_HIGH"}
+        and bool(analysis.get("action_items"))
+    )
+    if topics.is_subscription(email, analysis) and not actionable_subscription:
         db.dismiss_stale_actions(email_id, [])
         return 0
     candidates = analysis.get("action_items") or []
