@@ -26,6 +26,14 @@ class PublicDemoTests(unittest.TestCase):
         self.assertEqual(1, sum(not row["is_safe"] for row in rows))
         self.assertGreaterEqual(len(db.list_topics()), 8)
 
+    def test_presentation_is_public_and_self_contained(self):
+        app.config.update(TESTING=True, SECRET_KEY="test-secret")
+        with patch.object(config, "PUBLIC_DEMO", False), patch.object(config, "MULTI_USER_MODE", True):
+            response = app.test_client().get("/presentation")
+        self.assertEqual(200, response.status_code)
+        self.assertIn(b"TraceInbox", response.data)
+        self.assertIn(b"From scattered messages to traceable decisions", response.data)
+
     def test_old_synthetic_seed_is_safely_replaced(self):
         db.insert_email({
             "trace_id": "public-demo-old", "message_id": "<old@example.invalid>",

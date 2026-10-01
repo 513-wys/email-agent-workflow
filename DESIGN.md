@@ -1,5 +1,5 @@
 ---
-name: AI Email Assistant
+name: TraceInbox
 description: A calm, high-trust workspace for turning email into clear action.
 colors:
   action-blue: "#155eef"
@@ -50,7 +50,7 @@ components:
     padding: "24px"
 ---
 
-# Design System: AI Email Assistant
+# Design System: TraceInbox
 
 ## Overview
 

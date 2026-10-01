@@ -43,7 +43,7 @@ def load_account():
         db.init_db()
         settings_store.init_table()
 
-    public_endpoints = {"login", "register", "health", "set_language", "static"}
+    public_endpoints = {"login", "register", "health", "set_language", "static", "presentation"}
     if _hosted_mode() and request.endpoint not in public_endpoints and not g.user:
         return redirect(url_for("login", next=request.path))
     if _hosted_mode() and request.method == "POST":
@@ -150,6 +150,12 @@ def home():
     if settings_store.get("initial_sync_completed", "0") != "1":
         return redirect(url_for("onboarding"))
     return render_template("onboarding.html", ready=True, s=settings_store.get_all_masked())
+
+
+@app.route("/presentation")
+def presentation():
+    """Public, self-contained opening sequence for the recorded course demo."""
+    return render_template("presentation.html")
 
 
 @app.route("/demo/start", methods=["POST"])

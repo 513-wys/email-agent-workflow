@@ -4,7 +4,7 @@ LANGUAGES = {"en": "English", "zh": "中文"}
 
 STRINGS = {
     "en": {
-        "app_name": "AI Email Assistant", "dashboard": "Dashboard", "emails": "Emails",
+        "app_name": "TraceInbox", "dashboard": "Dashboard", "emails": "Emails",
         "public_demo_banner": "Public course demo · Synthetic emails only · Mailbox connections and account settings are disabled",
         "daily_digest": "Daily Digest", "settings": "Settings", "switch_language": "中文",
         "sync": "Sync and process", "total_emails": "Emails processed", "high_priority": "P0/P1 priority",
@@ -92,7 +92,7 @@ STRINGS = {
         "reason_codes": "Decision reasons", "action_candidates": "Action candidates", "not_detected": "Not detected",
     },
     "zh": {
-        "app_name": "AI 邮件助手", "dashboard": "仪表盘", "emails": "邮件", "daily_digest": "每日晨报",
+        "app_name": "TraceInbox", "dashboard": "仪表盘", "emails": "邮件", "daily_digest": "每日晨报",
         "public_demo_banner": "公开课程演示 · 仅使用虚构邮件 · 已关闭邮箱连接与账号设置",
         "settings": "设置", "switch_language": "English", "sync": "收信并处理", "total_emails": "累计处理邮件",
         "high_priority": "P0/P1 高优先级", "quarantined": "已隔离", "recent": "最近处理", "sender": "发件人",
