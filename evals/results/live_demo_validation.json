@@ -1,0 +1,164 @@
+{
+  "validation_type": "live deployed public-demo validation",
+  "base_url": "https://email-agent-workflow.onrender.com",
+  "run_at": "2026-10-01T16:20:16.227977+00:00",
+  "surfaces": {
+    "email_count": 20,
+    "email_count_pass": true,
+    "topic_count": 9,
+    "topic_count_pass": true,
+    "open_action_count": 9,
+    "open_actions_present": true,
+    "digest_contains_nova": true,
+    "digest_contains_ax4102": true,
+    "digest_excludes_quarantined_phishing": true
+  },
+  "qa_cases": [
+    {
+      "id": "QA-01",
+      "expected_source_titles": [
+        "AX4102 proposal deadline extended and rubric clarified",
+        "Submission received: AX4102 team proposal"
+      ],
+      "returned_source_titles": [
+        "AX4102 proposal deadline extended and rubric clarified",
+        "Submission received: AX4102 team proposal"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "The AX4102 proposal deadline was extended to 6 October 2026 at 18:00, with a maximum of three pages excluding references [1]. The proposal was submitted and received at 17:41 on 6 October [2]. No further action is required unless the teaching team contacts you [2]."
+    },
+    {
+      "id": "QA-02",
+      "expected_source_titles": [
+        "AX4102 proposal deadline extended and rubric clarified"
+      ],
+      "returned_source_titles": [
+        "AX4102 proposal deadline extended and rubric clarified"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "The current AX4102 proposal deadline is 6 October 2026 at 18:00 [1]. The proposal may be up to three pages excluding references. The rubric is reasoning 40%, evaluation design 30%, feasibility 20%, and presentation 10% [1]."
+    },
+    {
+      "id": "QA-03",
+      "expected_source_titles": [
+        "Project NOVA final demo requirements"
+      ],
+      "returned_source_titles": [
+        "Project NOVA final demo requirements"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "Project NOVA requires a public repository, a 5–8 minute video with presenter and screen visible, a report of no more than 1,200 words, and transparent data and eval files [1]. Repository materials are due on 8 October at 12:00, before the final demo on 9 October [1]."
+    },
+    {
+      "id": "QA-04",
+      "expected_source_titles": [
+        "Project NOVA evaluation review: three gaps"
+      ],
+      "returned_source_titles": [
+        "Project NOVA evaluation review: three gaps"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "Three gaps still need regression coverage: irrelevant retrieval sources for identifier queries, duplicate actions after reprocessing, and subscription emails appearing in the action list [1]."
+    },
+    {
+      "id": "QA-05",
+      "expected_source_titles": [
+        "Invitation: Responsible AI roundtable",
+        "Venue changed: Responsible AI roundtable"
+      ],
+      "returned_source_titles": [
+        "Venue changed: Responsible AI roundtable",
+        "Invitation: Responsible AI roundtable"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "The Responsible AI roundtable remains on 14 October from 14:00–16:00, but the venue changed from Harbour Room 3 [2] to Gallery Hall 1 [1]. Existing registrations remain valid [1]."
+    },
+    {
+      "id": "QA-06",
+      "expected_source_titles": [
+        "CloudNotes Pro renewal on 15 October",
+        "CloudNotes Pro now includes meeting summaries",
+        "CloudNotes payment failed — update by 18 October",
+        "Agent Systems Weekly: evaluation patterns"
+      ],
+      "returned_source_titles": [
+        "CloudNotes Pro renewal on 15 October",
+        "CloudNotes payment failed — update by 18 October",
+        "CloudNotes Pro now includes meeting summaries",
+        "Agent Systems Weekly: evaluation patterns"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "CloudNotes Pro costs USD 12 per month and was scheduled to renew on 15 October [1]. Its payment failed, so update the payment method by 18 October to avoid read-only service [2]. The meeting-summary update requires no action [3]. Agent Systems Weekly is informational and has no deadline or required response [4]."
+    },
+    {
+      "id": "QA-07",
+      "expected_source_titles": [
+        "New sign-in to your demo account — SEC-4821"
+      ],
+      "returned_source_titles": [
+        "New sign-in to your demo account — SEC-4821"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "SEC-4821 is a legitimate account alert describing a Chrome sign-in from macOS in Singapore [1]. Review it only if unfamiliar; otherwise no action is needed [1]."
+    },
+    {
+      "id": "QA-08",
+      "expected_source_titles": [
+        "Case CS-1047 resolved: repository access restored"
+      ],
+      "returned_source_titles": [
+        "Case CS-1047 resolved: repository access restored"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "Support case CS-1047 is resolved and repository access has been restored for Alex and Sam [1]. Reopen within three business days only if access still fails [1]."
+    },
+    {
+      "id": "QA-09",
+      "expected_source_titles": [
+        "Helio Robotics graduate engineering talk",
+        "Helio Robotics applications close 20 October"
+      ],
+      "returned_source_titles": [
+        "Helio Robotics graduate engineering talk",
+        "Helio Robotics applications close 20 October"
+      ],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "Helio Robotics' graduate engineering talk is on 12 October; optional talk registration closes 10 October [1]. Applications for its graduate software and AI roles close 20 October at 23:59 and require a CV, transcript, and 200-word project summary [2]."
+    },
+    {
+      "id": "QA-10",
+      "expected_source_titles": [],
+      "returned_source_titles": [],
+      "source_set_pass": true,
+      "required_answer_content_pass": true,
+      "forbidden_answer_content_pass": true,
+      "answer": "There is not enough relevant email evidence to answer this question."
+    }
+  ],
+  "summary": {
+    "surface_checks_passed": 5,
+    "surface_checks_total": 5,
+    "qa_source_sets_passed": 10,
+    "qa_source_sets_total": 10,
+    "qa_content_checks_passed": 10,
+    "qa_content_checks_total": 10
+  }
+}
