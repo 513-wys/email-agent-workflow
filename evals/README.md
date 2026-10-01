@@ -29,3 +29,5 @@ PYTHONPATH=. python evals/run_holdout.py
 The checked-in `results/holdout.md` and `results/holdout.json` are the first-run results before any holdout-driven rule changes. Keep these files frozen; if the product is tuned against these failures, use a new unseen set to make the next generalization claim.
 
 `results/holdout_after_fix.*` records the regression after the discovered failures were addressed. It must not be presented as a second independent test; its purpose is to show which known failures were fixed and which remain.
+
+The public deployment disables external model calls. Its published evaluation questions use checked-in, model-free synthesis in `app/demo_answers.py`; arbitrary questions fall back to extractive local evidence. This makes the course demo reproducible and auditable, but it is not evidence of model-backed answer quality.

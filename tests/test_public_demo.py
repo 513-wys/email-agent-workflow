@@ -60,6 +60,16 @@ class PublicDemoTests(unittest.TestCase):
         self.assertIn("not enough relevant email evidence", english["answer"])
         self.assertIn("没有找到足够相关的邮件依据", chinese["answer"])
 
+    def test_published_demo_question_uses_auditable_synthesis(self):
+        sources = [
+            {"id": 1, "email_id": 1, "title": "Deadline", "sender": "teacher@example.edu", "text": "Deadline", "score": 1.0},
+            {"id": 2, "email_id": 2, "title": "Receipt", "sender": "platform@example.edu", "text": "Received", "score": 0.9},
+        ]
+        with patch("app.rag.config.PUBLIC_DEMO", True), patch("app.rag.retrieve", return_value=sources):
+            result = rag.answer("What remains to be done for AX4102?")
+        self.assertIn("proposal was submitted", result["answer"])
+        self.assertIn("No further action", result["answer"])
+
     def test_public_demo_entry_uses_only_display_values(self):
         app.config.update(TESTING=True, SECRET_KEY="test-secret")
         with patch.object(config, "PUBLIC_DEMO", True), patch.object(config, "MULTI_USER_MODE", False):

@@ -2,7 +2,7 @@
 import re
 import uuid
 
-from app import config, db, llm
+from app import config, db, demo_answers, llm
 
 
 def _terms(text, expand=False):
@@ -113,6 +113,9 @@ def answer(question, topic_id=None):
         )
         return {"answer": message, "sources": []}
     if config.PUBLIC_DEMO:
+        curated = demo_answers.answer_for(question)
+        if curated:
+            return {"answer": curated, "sources": sources}
         chinese = bool(re.search(r"[\u4e00-\u9fff]", question))
         lead = "根据演示邮件，找到以下相关信息：" if chinese else "The demo mailbox contains these relevant updates:"
         bullets = []
