@@ -1,0 +1,62 @@
+{
+  "dataset_id": "email-agent-public-demo-v2",
+  "evals": [
+    {
+      "id": "QA-01", "question": "What remains to be done for AX4102?",
+      "expected_source_ids": ["AX4102-03", "AX4102-04"],
+      "must_include": ["proposal was submitted", "6 October", "no further action"],
+      "must_not_include_source_ids": ["NOVA-01", "PERSONAL-01"]
+    },
+    {
+      "id": "QA-02", "question": "Summarize the current AX4102 proposal deadline and rubric.",
+      "expected_source_ids": ["AX4102-03"],
+      "must_include": ["6 October 2026 at 18:00", "three pages", "reasoning 40%", "evaluation design 30%"],
+      "must_not_include": ["4 October is the current deadline"]
+    },
+    {
+      "id": "QA-03", "question": "What are the final deliverables for Project NOVA, and when are they due?",
+      "expected_source_ids": ["NOVA-04"],
+      "must_include": ["public repository", "5–8 minute video", "1,200 words", "data and eval files", "8 October at 12:00"]
+    },
+    {
+      "id": "QA-04", "question": "Which Project NOVA evaluation gaps still need regression coverage?",
+      "expected_source_ids": ["NOVA-03"],
+      "must_include": ["irrelevant retrieval sources", "duplicate actions", "subscription emails in the action list"]
+    },
+    {
+      "id": "QA-05", "question": "What changed for the Responsible AI roundtable?",
+      "expected_source_ids": ["EVENT-01", "EVENT-02"],
+      "must_include": ["Gallery Hall 1", "14 October", "14:00–16:00", "registrations remain valid"],
+      "must_not_include": ["Harbour Room 3 is the current venue"]
+    },
+    {
+      "id": "QA-06", "question": "What subscriptions do I have, and which one needs action?",
+      "expected_source_ids": ["SUB-01", "SUB-02", "SUB-03", "NEWS-01"],
+      "must_include": ["CloudNotes Pro", "USD 12", "payment failed", "18 October", "Agent Systems Weekly is informational"],
+      "must_not_include": ["CloudNotes feature update requires action"]
+    },
+    {
+      "id": "QA-07", "question": "Is SEC-4821 a phishing email?",
+      "expected_source_ids": ["SEC-01"],
+      "must_include": ["legitimate account alert", "review only if unfamiliar"],
+      "must_not_include_source_ids": ["SEC-02"]
+    },
+    {
+      "id": "QA-08", "question": "What is the status of support case CS-1047?",
+      "expected_source_ids": ["SUPPORT-01"],
+      "must_include": ["resolved", "repository access restored", "reopen within three business days only if access still fails"]
+    },
+    {
+      "id": "QA-09", "question": "Which upcoming career opportunities have deadlines?",
+      "expected_source_ids": ["CAREER-01", "CAREER-02"],
+      "must_include": ["Helio Robotics", "applications close 20 October", "talk registration closes 10 October"],
+      "must_not_include": ["application is mandatory"]
+    },
+    {
+      "id": "QA-10", "question": "What does the mailbox say about flight bookings for Tokyo?",
+      "expected_source_ids": [],
+      "must_include": ["not enough relevant email evidence"],
+      "behavior": "abstain"
+    }
+  ]
+}
