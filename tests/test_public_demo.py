@@ -21,8 +21,27 @@ class PublicDemoTests(unittest.TestCase):
     def test_seed_contains_only_synthetic_addresses(self):
         self.assertTrue(demo_seed.seed())
         rows = db.list_emails()
-        self.assertEqual(5, len(rows))
-        self.assertTrue(all("example" in row["sender"] for row in rows))
+        self.assertEqual(20, len(rows))
+        self.assertTrue(all("example" in row["sender"] or row["sender"].endswith(".invalid") for row in rows))
+        self.assertEqual(1, sum(not row["is_safe"] for row in rows))
+        self.assertGreaterEqual(len(db.list_topics()), 8)
+
+    def test_old_synthetic_seed_is_safely_replaced(self):
+        db.insert_email({
+            "trace_id": "public-demo-old", "message_id": "<old@example.invalid>",
+            "sender": "old@example.com", "subject": "Old demo", "body_text": "Synthetic",
+            "date": "2026-01-01T00:00:00+00:00", "gmail_link": "", "threat_score": 0,
+            "risk_level": "LOW", "is_safe": 1, "intent": "OTHER", "category": "OTHER",
+            "priority": "P3_LOW", "sentiment": "NEUTRAL", "language": "en-US",
+            "summary": "Old", "summary_zh": "", "context_json": "{}", "status": "已分类",
+            "created_at": "2026-01-01T00:00:00+00:00", "account_id": "public-demo",
+            "provider": "DEMO", "source_uid": "1", "internet_message_id": "",
+            "provider_message_id": "", "received_at": "2026-01-01T00:00:00+00:00",
+            "original_url": "", "content_hash": "old", "uidvalidity": "demo",
+            "provider_thread_id": "", "forwarded_by": "",
+        })
+        self.assertTrue(demo_seed.seed())
+        self.assertEqual(20, db.stats()["total"])
 
     def test_public_demo_answer_does_not_call_model(self):
         source = {"id": 1, "email_id": 1, "title": "Demo", "sender": "demo@example.edu",
@@ -66,6 +85,22 @@ class PublicDemoTests(unittest.TestCase):
             original = client.get("/demo/original/1")
             self.assertEqual(200, original.status_code)
             self.assertIn(b"Synthetic Gmail preview", original.data)
+
+    def test_twenty_case_dataset_populates_product_surfaces(self):
+        app.config.update(TESTING=True, SECRET_KEY="test-secret")
+        with patch.object(config, "PUBLIC_DEMO", True), patch.object(config, "MULTI_USER_MODE", False):
+            demo_seed.seed()
+            client = app.test_client()
+            emails = client.get("/emails")
+            knowledge_page = client.get("/knowledge")
+            actions_page = client.get("/actions")
+            self.assertEqual(200, emails.status_code)
+            self.assertIn(b"AX4102", emails.data)
+            self.assertIn(b"CloudNotes", emails.data)
+            self.assertEqual(200, knowledge_page.status_code)
+            self.assertIn(b"Project NOVA", knowledge_page.data)
+            self.assertEqual(200, actions_page.status_code)
+            self.assertIn(b"CloudNotes", actions_page.data)
 
     def test_demo_start_is_unavailable_outside_public_demo(self):
         app.config.update(TESTING=True, SECRET_KEY="test-secret")

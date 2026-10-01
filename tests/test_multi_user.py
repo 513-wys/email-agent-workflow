@@ -40,7 +40,7 @@ class MultiUserTests(unittest.TestCase):
         with workspace(first["id"]):
             settings_store.set("deepseek_api_key", "sk-first-secret")
             demo_seed.seed()
-            self.assertEqual(db.stats()["total"], 5)
+            self.assertEqual(db.stats()["total"], 20)
             self.assertEqual(settings_store.get("deepseek_api_key"), "sk-first-secret")
 
         with workspace(second["id"]):

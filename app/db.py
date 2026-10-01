@@ -66,6 +66,32 @@ def init_db():
     conn.close()
 
 
+def public_demo_dataset_is_current(expected_count=20, version="public-demo-v2"):
+    """Return whether the isolated demo database already contains the current fixture."""
+    conn = _conn()
+    row = conn.execute(
+        "SELECT COUNT(*) total, SUM(CASE WHEN provider='DEMO' AND uidvalidity=? THEN 1 ELSE 0 END) current_rows FROM emails",
+        (version,),
+    ).fetchone()
+    conn.close()
+    return row["total"] == expected_count and row["current_rows"] == expected_count
+
+
+def reset_public_demo_data():
+    """Replace synthetic demo content only; refuse to touch a database containing non-demo mail."""
+    conn = _conn()
+    non_demo = conn.execute("SELECT COUNT(*) FROM emails WHERE COALESCE(provider, '') != 'DEMO'").fetchone()[0]
+    if non_demo:
+        conn.close()
+        raise RuntimeError("Refusing to reset a database containing non-demo email")
+    with conn:
+        conn.execute("DELETE FROM rag_queries")
+        conn.execute("DELETE FROM knowledge_topics")
+        conn.execute("DELETE FROM knowledge_documents")
+        conn.execute("DELETE FROM emails")
+    conn.close()
+
+
 def insert_email(record: dict):
     record = {**record, "forwarded_by": record.get("forwarded_by", "")}
     conn = _conn()
