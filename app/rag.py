@@ -105,7 +105,13 @@ def retrieve(question, limit=6, topic_id=None):
 def answer(question, topic_id=None):
     sources = retrieve(question, topic_id=topic_id)
     if not sources:
-        return {"answer": "没有找到足够相关的邮件依据，暂时无法回答。", "sources": []}
+        chinese = bool(re.search(r"[\u4e00-\u9fff]", question))
+        message = (
+            "没有找到足够相关的邮件依据，暂时无法回答。"
+            if chinese else
+            "There is not enough relevant email evidence to answer this question."
+        )
+        return {"answer": message, "sources": []}
     if config.PUBLIC_DEMO:
         chinese = bool(re.search(r"[\u4e00-\u9fff]", question))
         lead = "根据演示邮件，找到以下相关信息：" if chinese else "The demo mailbox contains these relevant updates:"

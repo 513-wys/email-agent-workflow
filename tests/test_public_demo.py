@@ -53,6 +53,13 @@ class PublicDemoTests(unittest.TestCase):
         model.assert_not_called()
         self.assertEqual(1, len(result["sources"]))
 
+    def test_public_demo_abstention_matches_question_language(self):
+        with patch("app.rag.retrieve", return_value=[]):
+            english = rag.answer("What hotel did I reserve?")
+            chinese = rag.answer("我预订了哪家酒店？")
+        self.assertIn("not enough relevant email evidence", english["answer"])
+        self.assertIn("没有找到足够相关的邮件依据", chinese["answer"])
+
     def test_public_demo_entry_uses_only_display_values(self):
         app.config.update(TESTING=True, SECRET_KEY="test-secret")
         with patch.object(config, "PUBLIC_DEMO", True), patch.object(config, "MULTI_USER_MODE", False):
@@ -101,6 +108,11 @@ class PublicDemoTests(unittest.TestCase):
             self.assertIn(b"Project NOVA", knowledge_page.data)
             self.assertEqual(200, actions_page.status_code)
             self.assertIn(b"CloudNotes", actions_page.data)
+
+            digest = client.post("/digest")
+            self.assertEqual(200, digest.status_code)
+            self.assertIn(b"Project NOVA", digest.data)
+            self.assertNotIn(b"mailbox suspension", digest.data)
 
     def test_demo_start_is_unavailable_outside_public_demo(self):
         app.config.update(TESTING=True, SECRET_KEY="test-secret")

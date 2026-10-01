@@ -385,7 +385,10 @@ def digest_generate():
         if r.get("priority") in ("P0_CRITICAL", "P1_HIGH") and r.get("status") == "已分类"
     ]
     if config.PUBLIC_DEMO:
-        high = [row for row in rows if row.get("priority") in ("P0_CRITICAL", "P1_HIGH")]
+        high = [
+            row for row in rows
+            if row.get("priority") in ("P0_CRITICAL", "P1_HIGH") and row.get("status") == "已分类"
+        ]
         text = "## Demo inbox brief\n\n" + "\n".join(
             f"- {row.get('subject')}: {row.get('summary')}" for row in high
         )
