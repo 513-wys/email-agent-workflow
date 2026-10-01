@@ -160,7 +160,24 @@ def demo_start():
     session.clear()
     session["demo_entered"] = True
     session.permanent = False
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("demo_import"))
+
+
+@app.route("/demo/import")
+def demo_import():
+    if not config.PUBLIC_DEMO or not session.get("demo_entered"):
+        return redirect(url_for("home"))
+    return render_template("demo_import.html", total=20)
+
+
+@app.route("/demo/original/<int:email_id>")
+def demo_original(email_id):
+    if not config.PUBLIC_DEMO:
+        return redirect(url_for("email_detail", email_id=email_id))
+    email = db.get_email(email_id)
+    if not email or (email.get("provider") or "").upper() != "DEMO":
+        return redirect(url_for("emails"))
+    return render_template("demo_original.html", e=email)
 
 
 @app.route("/dashboard")
@@ -347,6 +364,8 @@ def email_detail(email_id):
     elif e.get("original_url") or e.get("gmail_link"):
         precise_link = e.get("original_url") or e.get("gmail_link") or ""
     is_demo = (e.get("provider") == "DEMO") or str(e.get("message_id") or "").startswith("demo-")
+    if is_demo and config.PUBLIC_DEMO:
+        precise_link = url_for("demo_original", email_id=email_id)
     return render_template(
         "email_detail.html", e=e, ctx=ctx, analysis=db.get_email_analysis(email_id),
         original_link=precise_link, is_demo=is_demo

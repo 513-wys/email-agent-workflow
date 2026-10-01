@@ -20,33 +20,46 @@
       <div class="mail-mark" aria-hidden="true">
         <svg viewBox="0 0 48 48"><path d="M8 13h32v23H8z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m9 15 15 12 15-12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
       </div>
-      <h1>{{ 'See an inbox become an action workspace.' if lang == 'en' else '看看收件箱如何变成行动工作台。' }}</h1>
-      <p>{{ 'Explore classification, priorities, action extraction, topic organization, cited cross-email answers, and a daily brief—without connecting a real mailbox.' if lang == 'en' else '无需连接真实邮箱，即可体验分类、优先级、行动提取、主题整理、带引用的跨邮件问答和每日晨报。' }}</p>
+      <h1>{{ 'One workspace for every inbox that matters.' if lang == 'en' else '一个工作台，统一管理所有重要邮箱。' }}</h1>
+      <p>{{ 'Preview the complete product flow across Gmail, Outlook, and a forwarded university mailbox—using safe synthetic identities.' if lang == 'en' else '使用安全的虚拟身份，完整体验 Gmail、Outlook 和学校转发邮箱的统一处理流程。' }}</p>
       <ul class="auth-promises demo-promises">
-        <li>{{ 'Every message, identity, date, and organization is synthetic.' if lang == 'en' else '所有邮件、人物、日期和机构均为虚构。' }}</li>
-        <li>{{ 'The form demonstrates setup but stores no submitted values.' if lang == 'en' else '表单仅演示配置流程，不保存提交内容。' }}</li>
-        <li>{{ 'No mailbox connection or external model request is made.' if lang == 'en' else '不会连接邮箱，也不会调用外部模型。' }}</li>
+        <li>{{ 'Unified triage across multiple mailbox sources.' if lang == 'en' else '统一处理来自多个邮箱来源的邮件。' }}</li>
+        <li>{{ 'Action items, knowledge topics, cited answers, and daily briefs.' if lang == 'en' else '行动事项、知识主题、带引用问答和每日晨报。' }}</li>
+        <li>{{ 'Simulated original-email views preserve the end-to-end journey.' if lang == 'en' else '通过模拟原邮件页面保留完整的端到端体验。' }}</li>
       </ul>
     </section>
 
     <section class="auth-card demo-entry-card">
-      <h2>{{ 'Explore the course demo' if lang == 'en' else '进入课程演示' }}</h2>
-      <p>{{ 'These prefilled values are fictional and exist only to show the intended onboarding flow.' if lang == 'en' else '以下预填内容均为虚构，仅用于展示真实产品的配置流程。' }}</p>
+      <p class="step-label">{{ 'Workspace setup · Demo' if lang == 'en' else '工作区设置 · 演示' }}</p>
+      <h2>{{ 'Connect your communication sources' if lang == 'en' else '连接你的通信来源' }}</h2>
+      <p>{{ 'The accounts below are fictional but mirror the real multi-inbox setup.' if lang == 'en' else '以下账号均为虚构，但完整复刻真实的多邮箱配置方式。' }}</p>
       <div class="demo-safety-line" role="status">
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 16 5v4.2c0 3.8-2.4 6.7-6 8.3-3.6-1.6-6-4.5-6-8.3V5l6-2.5Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m7.5 10 1.6 1.6 3.5-3.7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>{{ 'Safe synthetic workspace' if lang == 'en' else '安全合成数据工作区' }}</span>
       </div>
 
       <form method="post" action="{{ url_for('demo_start') }}" class="auth-form demo-entry-form">
-        <div class="form-row">
-          <label for="demo_email">{{ 'Email address' if lang == 'en' else '邮箱地址' }}</label>
-          <input type="email" id="demo_email" name="demo_email" value="demo.student@example.com" autocomplete="off" spellcheck="false">
-          <p class="hint">{{ 'Synthetic identity—not an active mailbox.' if lang == 'en' else '虚构身份，并非真实邮箱。' }}</p>
+        <div class="demo-account-stack" aria-label="{{ 'Demo mailbox sources' if lang == 'en' else '演示邮箱来源' }}">
+          <div class="demo-account-card">
+            <span class="provider-mark provider-google">G</span>
+            <span><strong>demo.student@example.com</strong><small>Gmail · {{ 'Primary inbox' if lang == 'en' else '主收件箱' }}</small></span>
+            <span class="connection-state">{{ 'Ready' if lang == 'en' else '已就绪' }}</span>
+          </div>
+          <div class="demo-account-card">
+            <span class="provider-mark provider-outlook">O</span>
+            <span><strong>alex.chen@example.org</strong><small>Outlook · {{ 'Project inbox' if lang == 'en' else '项目邮箱' }}</small></span>
+            <span class="connection-state">{{ 'Ready' if lang == 'en' else '已就绪' }}</span>
+          </div>
+          <div class="demo-account-card">
+            <span class="provider-mark provider-school">U</span>
+            <span><strong>student@example.edu</strong><small>{{ 'University mail · Forwarded to Gmail' if lang == 'en' else '学校邮箱 · 转发至 Gmail' }}</small></span>
+            <span class="connection-state">{{ 'Forwarded' if lang == 'en' else '已转发' }}</span>
+          </div>
         </div>
         <div class="form-row">
-          <label for="demo_api_key">{{ 'DeepSeek API key' if lang == 'en' else 'DeepSeek API Key' }}</label>
+          <label for="demo_api_key">{{ 'Analysis provider' if lang == 'en' else '分析模型' }}</label>
           <input type="text" id="demo_api_key" name="demo_api_key" value="sk-demo-example-key" autocomplete="off" spellcheck="false">
-          <p class="hint">{{ 'Display only. This value is ignored and never sent.' if lang == 'en' else '仅供展示；系统会忽略它，也不会发送。' }}</p>
+          <p class="hint">DeepSeek API · {{ 'Simulated credential; never sent or stored.' if lang == 'en' else '模拟凭据，不会发送或保存。' }}</p>
         </div>
         <div class="form-row">
           <label for="demo_limit">{{ 'Initial import' if lang == 'en' else '首次导入' }}</label>
@@ -55,7 +68,7 @@
             <span>{{ 'emails' if lang == 'en' else '封' }}</span>
           </div>
         </div>
-        <button class="btn btn-primary btn-wide" type="submit">{{ 'Open demo workspace' if lang == 'en' else '打开演示工作区' }}</button>
+        <button class="btn btn-primary btn-wide" type="submit">{{ 'Import 20 demo emails' if lang == 'en' else '导入 20 封演示邮件' }}</button>
       </form>
 
       <p class="demo-privacy-note">

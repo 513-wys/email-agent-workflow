@@ -17,7 +17,7 @@
   </div>
   {% if original_link %}
     <p style="margin-top:14px;">
-      <a class="btn btn-primary" href="{{ original_link }}" target="_blank" rel="noopener noreferrer">{{ t('open_gmail') }}</a>
+      <a class="btn btn-primary" href="{{ original_link }}" target="_blank" rel="noopener noreferrer">{{ t('open_demo_original') if is_demo else t('open_gmail') }}</a>
     </p>
   {% elif is_demo %}
     <p class="source-note">{{ t('demo_no_original') }}</p>

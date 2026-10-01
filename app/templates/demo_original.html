@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ e.subject }} · Synthetic Gmail preview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="mail-preview-body">
+  <header class="mail-preview-topbar">
+    <span class="mail-preview-logo"><span>G</span>mail</span>
+    <span class="demo-pill">{{ 'Synthetic preview' if lang == 'en' else '合成数据预览' }}</span>
+    <a href="{{ url_for('email_detail', email_id=e.id) }}">{{ 'Back to Email Agent' if lang == 'en' else '返回邮件助手' }}</a>
+  </header>
+  <main class="mail-preview-layout">
+    <aside class="mail-preview-sidebar" aria-label="{{ 'Mailbox folders' if lang == 'en' else '邮箱文件夹' }}">
+      <strong>{{ 'Inbox' if lang == 'en' else '收件箱' }}</strong>
+      <span>{{ 'Starred' if lang == 'en' else '已加星标' }}</span>
+      <span>{{ 'Sent' if lang == 'en' else '已发送' }}</span>
+      <span>{{ 'Drafts' if lang == 'en' else '草稿箱' }}</span>
+    </aside>
+    <article class="mail-preview-message">
+      <p class="mail-preview-warning">{{ 'Demo only — this message does not exist in a real Gmail account.' if lang == 'en' else '仅供演示——此邮件不存在于真实 Gmail 账号中。' }}</p>
+      <h1>{{ e.subject }}</h1>
+      <div class="mail-preview-meta"><span class="avatar">{{ e.sender[:1]|upper }}</span><span><strong>{{ e.sender }}</strong><small>{{ e.received_at or e.date }}</small></span></div>
+      <div class="mail-preview-body-text">{{ e.body_text }}</div>
+    </article>
+  </main>
+</body>
+</html>

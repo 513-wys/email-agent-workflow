@@ -49,8 +49,23 @@ class PublicDemoTests(unittest.TestCase):
                     "demo_limit": "20",
                 })
             self.assertEqual(302, response.status_code)
-            self.assertTrue(response.headers["Location"].endswith("/dashboard"))
+            self.assertTrue(response.headers["Location"].endswith("/demo/import"))
             save_setting.assert_not_called()
+
+            progress = client.get("/demo/import")
+            self.assertEqual(200, progress.status_code)
+            self.assertIn(b"20", progress.data)
+
+    def test_demo_email_opens_simulated_original(self):
+        app.config.update(TESTING=True, SECRET_KEY="test-secret")
+        with patch.object(config, "PUBLIC_DEMO", True), patch.object(config, "MULTI_USER_MODE", False):
+            demo_seed.seed()
+            client = app.test_client()
+            detail = client.get("/emails/1")
+            self.assertIn(b"/demo/original/1", detail.data)
+            original = client.get("/demo/original/1")
+            self.assertEqual(200, original.status_code)
+            self.assertIn(b"Synthetic Gmail preview", original.data)
 
     def test_demo_start_is_unavailable_outside_public_demo(self):
         app.config.update(TESTING=True, SECRET_KEY="test-secret")

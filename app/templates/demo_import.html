@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'Preparing demo workspace' if lang == 'en' else '正在准备演示工作区' }} · {{ t('app_name') }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="demo-import-body">
+  <main class="demo-import-card" data-dashboard-url="{{ url_for('dashboard') }}">
+    <span class="demo-import-icon" aria-hidden="true">↻</span>
+    <p class="step-label">{{ 'Secure simulation' if lang == 'en' else '安全模拟流程' }}</p>
+    <h1>{{ 'Building your unified inbox' if lang == 'en' else '正在创建统一收件箱' }}</h1>
+    <p class="demo-import-message" aria-live="polite">{{ 'Connecting three demo sources…' if lang == 'en' else '正在连接三个演示来源…' }}</p>
+    <div class="progress-track demo-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4"><span></span></div>
+    <div class="progress-numbers"><strong>0 / {{ total }}</strong><span>{{ 'emails processed' if lang == 'en' else '封邮件已处理' }}</span></div>
+    <div class="demo-import-sources">
+      <span>Gmail</span><span>Outlook</span><span>{{ 'University forwarding' if lang == 'en' else '学校邮箱转发' }}</span>
+    </div>
+    <p class="demo-privacy-note">{{ 'This animation uses local synthetic fixtures. No account is contacted.' if lang == 'en' else '此动画仅使用本地合成数据，不会连接任何真实账号。' }}</p>
+  </main>
+  <script>
+    (() => {
+      const root = document.querySelector('.demo-import-card');
+      const bar = root.querySelector('.progress-track');
+      const fill = bar.querySelector('span');
+      const count = root.querySelector('.progress-numbers strong');
+      const message = root.querySelector('.demo-import-message');
+      const messages = {{ ([
+        'Connecting three demo sources…', 'Normalizing forwarded senders…',
+        'Classifying priorities and actions…', 'Building knowledge topics…',
+        'Workspace ready.'
+      ] if lang == 'en' else [
+        '正在连接三个演示来源…', '正在识别转发邮件的真实发件人…',
+        '正在分类优先级并提取行动…', '正在建立邮件知识主题…',
+        '工作区已就绪。'
+      ])|tojson }};
+      let processed = 0;
+      const total = {{ total }};
+      const timer = setInterval(() => {
+        processed = Math.min(total, processed + 2);
+        const percent = Math.round(processed / total * 100);
+        fill.style.transform = `scaleX(${percent / 100})`;
+        bar.setAttribute('aria-valuenow', percent);
+        count.textContent = `${processed} / ${total}`;
+        message.textContent = messages[Math.min(messages.length - 1, Math.floor(percent / 24))];
+        if (processed === total) {
+          clearInterval(timer);
+          setTimeout(() => window.location.assign(root.dataset.dashboardUrl), 650);
+        }
+      }, 170);
+    })();
+  </script>
+</body>
+</html>
