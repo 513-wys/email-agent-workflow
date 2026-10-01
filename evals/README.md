@@ -17,3 +17,13 @@ Separate programmatic checks will score per-message safety, intent, priority, ac
 The deterministic baseline/final runs are regression tests over the same fixed development set. They are not estimates of production accuracy and do not score generated-answer wording or model classification because the runner injects gold per-message labels.
 
 `HUMAN_EVAL_RUBRIC.md` defines a separate 100-point review standard. The current conservative review is recorded in `results/human_evaluation.md` and `results/human_evaluation.json`. It explicitly discounts same-set tuning and identifies the held-out and model-backed evidence still required.
+
+## Frozen holdout
+
+`fixtures/holdout_email_cases.json` and `holdout_qa_cases.json` introduce unseen identifiers and wording. Run them with:
+
+```bash
+PYTHONPATH=. python evals/run_holdout.py
+```
+
+The checked-in `results/holdout.md` and `results/holdout.json` are the first-run results before any holdout-driven rule changes. Keep these files frozen; if the product is tuned against these failures, use a new unseen set to make the next generalization claim.

@@ -86,9 +86,10 @@ def record_for(case, index):
     }
 
 
-def run():
-    dataset = json.loads(DATASET.read_text())["cases"]
-    qa_cases = json.loads(QA_SET.read_text())["evals"]
+def run(dataset_path=DATASET, qa_path=QA_SET):
+    dataset_document = json.loads(Path(dataset_path).read_text())
+    dataset = dataset_document["cases"]
+    qa_cases = json.loads(Path(qa_path).read_text())["evals"]
     with tempfile.TemporaryDirectory() as temp_dir, patch.object(config, "DB_PATH", Path(temp_dir) / "baseline.db"):
         db.init_db()
         email_ids = {}
@@ -156,7 +157,7 @@ def run():
         }
         return {
             "run_type": "offline deterministic baseline with gold per-message labels",
-            "dataset_id": "email-agent-public-demo-v2", "metrics": metrics,
+            "dataset_id": dataset_document["dataset_id"], "metrics": metrics,
             "topic_cases": topic_rows,
             "action_errors": {
                 "false_positive": sorted(predicted_action_ids - expected_action_ids),

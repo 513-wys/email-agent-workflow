@@ -1,0 +1,152 @@
+{
+  "run_type": "frozen held-out deterministic evaluation with gold per-message labels",
+  "dataset_id": "email-agent-holdout-v1",
+  "metrics": {
+    "dataset_cases": 10,
+    "topic_assignment_accuracy": 0.1,
+    "action_precision": 1.0,
+    "action_recall": 1.0,
+    "action_f1": 1.0,
+    "rag_micro_source_precision": 0.875,
+    "rag_micro_source_recall": 1.0,
+    "rag_exact_source_set_accuracy": 0.8,
+    "unsupported_question_abstention": 0.0
+  },
+  "topic_cases": [
+    {
+      "id": "DS5301-H1",
+      "expected": "course:DS5301",
+      "predicted": "category:education_notice",
+      "correct": false
+    },
+    {
+      "id": "DS5301-H2",
+      "expected": "course:DS5301",
+      "predicted": "category:education_notice",
+      "correct": false
+    },
+    {
+      "id": "DS5301-H3",
+      "expected": "course:DS5301",
+      "predicted": "category:education_notice",
+      "correct": false
+    },
+    {
+      "id": "ORION-H1",
+      "expected": "project:ORION",
+      "predicted": "category:project_update",
+      "correct": false
+    },
+    {
+      "id": "ORION-H2",
+      "expected": "project:ORION",
+      "predicted": "category:project_update",
+      "correct": false
+    },
+    {
+      "id": "TASKFLOW-H1",
+      "expected": "subscription:TaskFlow",
+      "predicted": "subscription:subscriptions",
+      "correct": false
+    },
+    {
+      "id": "TASKFLOW-H2",
+      "expected": "subscription:TaskFlow",
+      "predicted": "subscription:subscriptions",
+      "correct": false
+    },
+    {
+      "id": "SEMINAR-H1",
+      "expected": "event:data-ethics-seminar",
+      "predicted": "category:meeting_calendar",
+      "correct": false
+    },
+    {
+      "id": "SEMINAR-H2",
+      "expected": "event:data-ethics-seminar",
+      "predicted": "category:meeting_calendar",
+      "correct": false
+    },
+    {
+      "id": "PERSONAL-H1",
+      "expected": "personal:morgan-kim",
+      "predicted": "personal:morgan-kim",
+      "correct": true
+    }
+  ],
+  "action_errors": {
+    "false_positive": [],
+    "false_negative": []
+  },
+  "qa_cases": [
+    {
+      "id": "HQA-01",
+      "expected_sources": [
+        "DS5301-H2",
+        "DS5301-H3"
+      ],
+      "returned_sources": [
+        "DS5301-H3",
+        "DS5301-H2"
+      ],
+      "source_precision": 1.0,
+      "source_recall": 1.0,
+      "pass": true
+    },
+    {
+      "id": "HQA-02",
+      "expected_sources": [
+        "ORION-H2"
+      ],
+      "returned_sources": [
+        "ORION-H2"
+      ],
+      "source_precision": 1.0,
+      "source_recall": 1.0,
+      "pass": true
+    },
+    {
+      "id": "HQA-03",
+      "expected_sources": [
+        "TASKFLOW-H1",
+        "TASKFLOW-H2"
+      ],
+      "returned_sources": [
+        "TASKFLOW-H1",
+        "TASKFLOW-H2"
+      ],
+      "source_precision": 1.0,
+      "source_recall": 1.0,
+      "pass": true
+    },
+    {
+      "id": "HQA-04",
+      "expected_sources": [
+        "SEMINAR-H1",
+        "SEMINAR-H2"
+      ],
+      "returned_sources": [
+        "SEMINAR-H2",
+        "SEMINAR-H1"
+      ],
+      "source_precision": 1.0,
+      "source_recall": 1.0,
+      "pass": true
+    },
+    {
+      "id": "HQA-05",
+      "expected_sources": [],
+      "returned_sources": [
+        "SEMINAR-H1"
+      ],
+      "source_precision": 0.0,
+      "source_recall": 1.0,
+      "pass": false
+    }
+  ],
+  "limitations": [
+    "LLM security, classification, summaries, and answer generation are not scored in this offline run.",
+    "Gold labels are injected so this baseline isolates deterministic downstream behavior.",
+    "Exact source-set accuracy is intentionally strict; extra relevant context still counts as a set mismatch."
+  ]
+}

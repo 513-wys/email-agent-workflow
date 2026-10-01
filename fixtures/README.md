@@ -8,3 +8,5 @@
 - `expected` fields are labels, not model inputs. They define the acceptance target for deterministic fixtures and evals.
 
 The public demo should preserve the wording and identifiers that make each case testable, especially `AX4102`, `Project NOVA`, `SEC-4821`, and `CS-1047`.
+
+`holdout_email_cases.json` is a separate, synthetic generalization audit using unseen names and identifiers. It is not part of the public demo and must not be used to tune rules while its checked-in first-run score is presented as held-out evidence.

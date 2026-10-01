@@ -1,0 +1,78 @@
+{
+  "dataset_id": "email-agent-holdout-v1",
+  "language": "en",
+  "synthetic": true,
+  "frozen_before_evaluation": true,
+  "cases": [
+    {
+      "id": "DS5301-H1", "source": "university_forwarded", "account": "learner@example.edu",
+      "sender": "professor@faculty.example.edu", "subject": "DS5301 capstone brief",
+      "received_at": "2026-10-03T09:00:00+08:00",
+      "body": "The DS5301 capstone brief asks each team for a four-page design memo covering users, risks, evaluation metrics, and data governance. Submit by 22 October 2026 at 17:00.",
+      "expected": {"topic": "course:DS5301", "intent": "EDUCATION_NOTICE", "category": "Education notice", "priority": "P1_HIGH", "safe": true, "requires_action": true, "action": "Submit the DS5301 four-page design memo", "deadline": "2026-10-22T17:00:00+08:00"}
+    },
+    {
+      "id": "DS5301-H2", "source": "university_forwarded", "account": "learner@example.edu",
+      "sender": "professor@faculty.example.edu", "subject": "DS5301 deadline moved to 24 October",
+      "received_at": "2026-10-18T11:00:00+08:00",
+      "body": "The DS5301 design memo deadline has moved from 22 October to 24 October 2026 at 12:00. The page limit and rubric are unchanged.",
+      "expected": {"topic": "course:DS5301", "intent": "EDUCATION_NOTICE", "category": "Education notice", "priority": "P1_HIGH", "safe": true, "requires_action": true, "action": "Submit the DS5301 memo by the revised deadline", "deadline": "2026-10-24T12:00:00+08:00"}
+    },
+    {
+      "id": "DS5301-H3", "source": "university_forwarded", "account": "learner@example.edu",
+      "sender": "learning-platform@example.edu", "subject": "DS5301 design memo received",
+      "received_at": "2026-10-23T16:10:00+08:00",
+      "body": "Your DS5301 design memo was received successfully. Receipt DM-883. Nothing else is needed unless the instructor contacts your team.",
+      "expected": {"topic": "course:DS5301", "intent": "EDUCATION_NOTICE", "category": "Education notice", "priority": "P3_LOW", "safe": true, "requires_action": false}
+    },
+    {
+      "id": "ORION-H1", "source": "outlook", "account": "member@example.org",
+      "sender": "lead@studio.example.org", "subject": "Project ORION prototype review",
+      "received_at": "2026-10-05T14:00:00+08:00",
+      "body": "For Project ORION, prepare the prototype, test log, and risk register for review on 19 October at 10:00.",
+      "expected": {"topic": "project:ORION", "intent": "PROJECT_UPDATE", "category": "Project update", "priority": "P1_HIGH", "safe": true, "requires_action": true, "action": "Prepare ORION prototype review materials", "deadline": "2026-10-19T10:00:00+08:00"}
+    },
+    {
+      "id": "ORION-H2", "source": "outlook", "account": "member@example.org",
+      "sender": "lead@studio.example.org", "subject": "Project ORION review accepted",
+      "received_at": "2026-10-19T15:00:00+08:00",
+      "body": "The ORION prototype review is accepted. Before launch, only the accessibility check remains; record the result by 27 October.",
+      "expected": {"topic": "project:ORION", "intent": "PROJECT_UPDATE", "category": "Project update", "priority": "P1_HIGH", "safe": true, "requires_action": true, "action": "Complete and record the ORION accessibility check", "deadline": "2026-10-27T23:59:00+08:00"}
+    },
+    {
+      "id": "TASKFLOW-H1", "source": "gmail", "account": "demo@example.com",
+      "sender": "billing@taskflow.example.com", "subject": "TaskFlow annual plan renews for USD 96",
+      "received_at": "2026-10-07T08:00:00+08:00",
+      "body": "Your TaskFlow annual plan renews on 30 October 2026 for USD 96. No action is needed to continue.",
+      "expected": {"topic": "subscription:TaskFlow", "intent": "PAYMENT_BILLING", "category": "Payment and billing", "priority": "P3_LOW", "safe": true, "requires_action": false}
+    },
+    {
+      "id": "TASKFLOW-H2", "source": "gmail", "account": "demo@example.com",
+      "sender": "billing@taskflow.example.com", "subject": "TaskFlow card expired",
+      "received_at": "2026-10-28T08:00:00+08:00",
+      "body": "The payment card for TaskFlow has expired. Update it by 30 October to prevent the workspace becoming read-only.",
+      "expected": {"topic": "subscription:TaskFlow", "intent": "PAYMENT_BILLING", "category": "Payment and billing", "priority": "P1_HIGH", "safe": true, "requires_action": true, "action": "Update the TaskFlow payment method", "deadline": "2026-10-30T23:59:00+08:00"}
+    },
+    {
+      "id": "SEMINAR-H1", "source": "outlook", "account": "member@example.org",
+      "sender": "events@research.example.org", "subject": "Data Ethics seminar invitation",
+      "received_at": "2026-10-09T10:00:00+08:00",
+      "body": "The Data Ethics seminar is scheduled for 25 October, 13:00–15:00 in Room L2. Registration is optional.",
+      "expected": {"topic": "event:data-ethics-seminar", "intent": "MEETING_CALENDAR", "category": "Meeting and calendar", "priority": "P2_NORMAL", "safe": true, "requires_action": false}
+    },
+    {
+      "id": "SEMINAR-H2", "source": "outlook", "account": "member@example.org",
+      "sender": "events@research.example.org", "subject": "Data Ethics seminar is now online",
+      "received_at": "2026-10-21T10:00:00+08:00",
+      "body": "The Data Ethics seminar remains on 25 October from 13:00–15:00 but will now be online. Registered attendees will receive the link.",
+      "expected": {"topic": "event:data-ethics-seminar", "intent": "MEETING_CALENDAR", "category": "Meeting and calendar", "priority": "P2_NORMAL", "safe": true, "requires_action": false}
+    },
+    {
+      "id": "PERSONAL-H1", "source": "gmail", "account": "demo@example.com",
+      "sender": "morgan.kim@example.net", "subject": "Lunch next week?",
+      "received_at": "2026-10-11T18:00:00+08:00",
+      "body": "Would you like to have lunch next week? There is no urgency; let me know whenever convenient.",
+      "expected": {"topic": "personal:morgan-kim", "intent": "PERSONAL", "category": "Personal", "priority": "P3_LOW", "safe": true, "requires_action": false}
+    }
+  ]
+}

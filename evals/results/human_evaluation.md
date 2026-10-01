@@ -6,23 +6,23 @@ Rubric: `evals/HUMAN_EVAL_RUBRIC.md`
 
 ## Executive result
 
-**Overall score: 76/100 — Credible prototype**
+**Overall score: 71/100 — Credible prototype**
 
-The system demonstrates a coherent, privacy-safe email workflow and a reproducible evaluation harness. Its strongest evidence is deterministic organization, action handling, source traceability, and public-demo isolation. Its largest weakness is that the reported 100% final regression score was obtained on the same 20 emails and 10 questions used to tune the rules. The public demo's answer path is extractive rather than a separately evaluated synthesis model, and no unseen or adversarial holdout set has yet been scored.
+The system demonstrates a coherent, privacy-safe email workflow and a reproducible evaluation harness. Its strongest evidence is action handling, source traceability, and public-demo isolation. A newly frozen 10-email/5-question holdout achieved 87.5% retrieval precision, 100% retrieval recall, and 80% exact source sets, but only 10% strict topic-key accuracy and failed its unsupported-question abstention case. This confirms that the tuned 100% regression result does not generalize uniformly. The public demo's answer path is also extractive rather than a separately evaluated synthesis model.
 
 ## Scorecard
 
 | Dimension | Score | Weight | Reviewer evidence and deductions |
 | --- | ---: | ---: | --- |
-| Task correctness | 17 | 20 | The fixed set now correctly groups topics and handles actions, deadlines, completion, and quarantine. Deducted because the run injects gold per-message labels and therefore does not measure model classification quality. |
+| Task correctness | 14 | 20 | The fixed set passes, but strict topic-key accuracy falls to 10% on unseen course, project, subscription, and event names. The run also injects gold per-message labels and does not measure model classification quality. |
 | Answer completeness and usefulness | 13 | 20 | The 10 questions specify strong content expectations, including superseded facts and multi-email synthesis. However, the offline runner scores source sets rather than the wording, completeness, or readability of generated answers; public-demo answers are extractive snippets. |
-| Retrieval relevance | 14 | 15 | All expected source sets pass after tuning. Deducted because evaluation and tuning use the same set and some retrieval logic contains domain-specific lexical rules. |
+| Retrieval relevance | 13 | 15 | The held-out set reaches 87.5% micro precision, 100% recall, and 80% exact source sets. This is useful but not yet broad enough for a high-confidence generalization claim. |
 | Citation faithfulness and traceability | 8 | 10 | Retrieved emails are exposed as sources and answers use numbered citations. Deducted because claim-level citation correctness has not been independently annotated or scored. |
-| Safety and privacy | 9 | 10 | Public data uses reserved fictional domains; the phishing case is quarantined; unsupported questions abstain; demo mode disables mailbox/API access. Deducted because a synthetic demo and unit tests are not a production penetration/security audit. |
-| Robustness and generalization | 4 | 10 | Identifier hard filters and regression tests address known failures. Major deductions: no held-out email set, no paraphrase suite, limited bilingual RAG evaluation, no large-mailbox/load test, and possible overfitting to AX4102/NOVA/subscription wording. |
+| Safety and privacy | 8 | 10 | Public data uses reserved fictional domains; the phishing case is quarantined; demo mode disables mailbox/API access. The held-out unsupported hotel question was not rejected, and this is not a production security audit. |
+| Robustness and generalization | 2 | 10 | The frozen holdout exposes substantial dependence on known identifiers and lexical patterns. There is still no bilingual RAG suite, large-mailbox/load test, or adversarial model evaluation. |
 | UX and demo readiness | 4 | 5 | The application has an English-first demo, Chinese switch, onboarding, dashboard, knowledge, actions, digest, and simulated original-email view. Deducted because a complete moderated user test and final 20-message deployed walkthrough have not yet been documented. |
-| Reproducibility and transparency | 7 | 10 | Dataset, expected labels, QA set, executable runner, baseline, final results, comparison, README, product documentation, and architecture are checked in. Deducted because there is no model-backed result file, human annotation sheet, environment/version manifest, or held-out result yet. |
-| **Total** | **76** | **100** | **Credible prototype; not a production-quality or generalized 100% system.** |
+| Reproducibility and transparency | 9 | 10 | Development data, a separately frozen holdout, expected labels, QA sets, executable runners, results, README, product documentation, and architecture are checked in. A model-backed result and independent reviewer annotation are still missing. |
+| **Total** | **71** | **100** | **Credible prototype; not a production-quality or generalized 100% system.** |
 
 ## Manual question-level assessment
 
@@ -49,12 +49,12 @@ The final deterministic run is valuable as a **regression gate**: future code ch
 4. no held-out distribution or blind reviewer was used;
 5. the dataset is small and intentionally structured.
 
-For the report, the defensible claim is: **“The tuned deterministic layer achieved 100% on the fixed regression set; a rubric-based simulated human audit scored the overall prototype 76/100, with generalization and generated-answer evaluation as the principal gaps.”**
+For the report, the defensible claim is: **“The tuned deterministic layer achieved 100% on its fixed regression set. On a separately frozen holdout, retrieval reached 87.5% precision, 100% recall, and 80% exact source sets, while strict topic-key accuracy was 10% and unsupported-question abstention failed. A rubric-based simulated human audit therefore scored the overall prototype 71/100.”**
 
 ## Required next evidence
 
-1. Freeze the current 20 cases as the development/regression set.
-2. Create a separate held-out set of at least 10 emails and 5 paraphrased questions that are not used during tuning.
+1. Keep the current 20 cases as the development/regression set and the 10-email holdout frozen.
+2. Diagnose holdout failures, then validate any improvements on a second unseen set rather than reusing this holdout as proof.
 3. Save actual model answers and have a reviewer score completeness, faithfulness, and citation support using this rubric.
 4. Add Chinese questions and ambiguous/hostile inputs.
 5. Record latency, failure rate, and approximate model cost for a complete import and QA run.
@@ -72,6 +72,6 @@ For the report, the defensible claim is: **“The tuned deterministic layer achi
 | Transparent evals and explainer | `evals/demo_qa_cases.json`, `evals/README.md`, this rubric and result | Present |
 | Legible module-level code documentation | Module docstrings, README module map, architecture documentation | Mostly present |
 | Persona, input, output, architecture | `PRODUCT.md`, `README.md`, `ARCHITECTURE.md` | Present |
-| Targeted metrics and reached metrics | Baseline/final comparison plus human score | Present, but held-out/model-backed metrics remain missing |
+| Targeted metrics and reached metrics | Baseline/final comparison, frozen holdout, and human score | Present, but model-backed metrics remain missing |
 
 This checklist should be updated again immediately before submission.

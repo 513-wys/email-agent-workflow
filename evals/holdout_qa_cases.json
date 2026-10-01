@@ -1,0 +1,10 @@
+{
+  "dataset_id": "email-agent-holdout-v1",
+  "evals": [
+    {"id": "HQA-01", "question": "Is anything still due for DS5301?", "expected_source_ids": ["DS5301-H2", "DS5301-H3"]},
+    {"id": "HQA-02", "question": "What remains before Project ORION can launch?", "expected_source_ids": ["ORION-H2"]},
+    {"id": "HQA-03", "question": "List my TaskFlow subscription cost and required payment action.", "expected_source_ids": ["TASKFLOW-H1", "TASKFLOW-H2"]},
+    {"id": "HQA-04", "question": "How did the Data Ethics seminar location change?", "expected_source_ids": ["SEMINAR-H1", "SEMINAR-H2"]},
+    {"id": "HQA-05", "question": "What hotel did I reserve in Seoul?", "expected_source_ids": [], "behavior": "abstain"}
+  ]
+}
