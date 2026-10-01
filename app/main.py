@@ -146,10 +146,21 @@ def set_language(lang):
 @app.route("/")
 def home():
     if config.PUBLIC_DEMO:
-        return redirect(url_for("dashboard"))
+        return render_template("demo_entry.html")
     if settings_store.get("initial_sync_completed", "0") != "1":
         return redirect(url_for("onboarding"))
     return render_template("onboarding.html", ready=True, s=settings_store.get_all_masked())
+
+
+@app.route("/demo/start", methods=["POST"])
+def demo_start():
+    """Enter the public sandbox without retaining or validating display-only values."""
+    if not config.PUBLIC_DEMO:
+        return redirect(url_for("home"))
+    session.clear()
+    session["demo_entered"] = True
+    session.permanent = False
+    return redirect(url_for("dashboard"))
 
 
 @app.route("/dashboard")

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'Course Demo' if lang == 'en' else '课程演示' }} · {{ t('app_name') }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body demo-entry-body">
+  <header class="onboarding-topbar">
+    <span class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 7.25 12 12.5l7.5-5.25M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{{ t('app_name') }}</span>
+    <div class="demo-top-actions">
+      <span class="demo-mode-label">{{ 'Course demo' if lang == 'en' else '课程演示' }}</span>
+      <a class="language-switch" href="{{ url_for('set_language', lang='zh' if lang == 'en' else 'en', next=request.full_path) }}">{{ t('switch_language') }}</a>
+    </div>
+  </header>
+
+  <main class="auth-shell demo-entry-shell">
+    <section class="auth-story demo-story">
+      <div class="mail-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M8 13h32v23H8z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m9 15 15 12 15-12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      </div>
+      <h1>{{ 'See an inbox become an action workspace.' if lang == 'en' else '看看收件箱如何变成行动工作台。' }}</h1>
+      <p>{{ 'Explore classification, priorities, action extraction, topic organization, cited cross-email answers, and a daily brief—without connecting a real mailbox.' if lang == 'en' else '无需连接真实邮箱，即可体验分类、优先级、行动提取、主题整理、带引用的跨邮件问答和每日晨报。' }}</p>
+      <ul class="auth-promises demo-promises">
+        <li>{{ 'Every message, identity, date, and organization is synthetic.' if lang == 'en' else '所有邮件、人物、日期和机构均为虚构。' }}</li>
+        <li>{{ 'The form demonstrates setup but stores no submitted values.' if lang == 'en' else '表单仅演示配置流程，不保存提交内容。' }}</li>
+        <li>{{ 'No mailbox connection or external model request is made.' if lang == 'en' else '不会连接邮箱，也不会调用外部模型。' }}</li>
+      </ul>
+    </section>
+
+    <section class="auth-card demo-entry-card">
+      <h2>{{ 'Explore the course demo' if lang == 'en' else '进入课程演示' }}</h2>
+      <p>{{ 'These prefilled values are fictional and exist only to show the intended onboarding flow.' if lang == 'en' else '以下预填内容均为虚构，仅用于展示真实产品的配置流程。' }}</p>
+      <div class="demo-safety-line" role="status">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 16 5v4.2c0 3.8-2.4 6.7-6 8.3-3.6-1.6-6-4.5-6-8.3V5l6-2.5Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m7.5 10 1.6 1.6 3.5-3.7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>{{ 'Safe synthetic workspace' if lang == 'en' else '安全合成数据工作区' }}</span>
+      </div>
+
+      <form method="post" action="{{ url_for('demo_start') }}" class="auth-form demo-entry-form">
+        <div class="form-row">
+          <label for="demo_email">{{ 'Email address' if lang == 'en' else '邮箱地址' }}</label>
+          <input type="email" id="demo_email" name="demo_email" value="demo.student@example.com" autocomplete="off" spellcheck="false">
+          <p class="hint">{{ 'Synthetic identity—not an active mailbox.' if lang == 'en' else '虚构身份，并非真实邮箱。' }}</p>
+        </div>
+        <div class="form-row">
+          <label for="demo_api_key">{{ 'DeepSeek API key' if lang == 'en' else 'DeepSeek API Key' }}</label>
+          <input type="text" id="demo_api_key" name="demo_api_key" value="sk-demo-example-key" autocomplete="off" spellcheck="false">
+          <p class="hint">{{ 'Display only. This value is ignored and never sent.' if lang == 'en' else '仅供展示；系统会忽略它，也不会发送。' }}</p>
+        </div>
+        <div class="form-row">
+          <label for="demo_limit">{{ 'Initial import' if lang == 'en' else '首次导入' }}</label>
+          <div class="quantity-control">
+            <input type="number" id="demo_limit" name="demo_limit" value="20" min="20" max="20" readonly>
+            <span>{{ 'emails' if lang == 'en' else '封' }}</span>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-wide" type="submit">{{ 'Open demo workspace' if lang == 'en' else '打开演示工作区' }}</button>
+      </form>
+
+      <p class="demo-privacy-note">
+        <strong>{{ 'Privacy boundary:' if lang == 'en' else '隐私边界：' }}</strong>
+        {{ 'No value on this page is used for authentication, storage, mailbox access, or an API call.' if lang == 'en' else '本页任何内容都不会用于认证、保存、邮箱访问或 API 调用。' }}
+      </p>
+    </section>
+  </main>
+</body>
+</html>

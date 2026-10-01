@@ -6,11 +6,11 @@ services:
     healthCheckPath: /health
     envVars:
       - key: PUBLIC_DEMO
-        value: "false"
-      - key: DEMO_MODE
-        value: "false"
-      - key: MULTI_USER_MODE
         value: "true"
+      - key: DEMO_MODE
+        value: "true"
+      - key: MULTI_USER_MODE
+        value: "false"
       - key: COOKIE_SECURE
         value: "true"
       - key: APP_SECRET_KEY

@@ -22,10 +22,10 @@ The repository supports two deliberately separated modes:
 | Mode | Data | Mailbox access | External model |
 | --- | --- | --- | --- |
 | Personal local mode | Your local mailbox data | Optional, configured locally | DeepSeek or Ollama |
-| Public course demo | Five synthetic messages using reserved example domains | Disabled | Disabled |
+| Public course demo | Curated synthetic messages using reserved example domains | Disabled | Disabled |
 | Hosted multi-user mode | Separate workspace database for each account | Each user supplies their own mailbox credential | Each user supplies their own DeepSeek key |
 
-Set `PUBLIC_DEMO=true` for a shareable deployment. Public demo mode automatically creates synthetic fixtures, hides account settings, disables mailbox synchronization and action mutations, and uses an extractive local answer path. It never needs a mailbox credential or API key.
+Set `PUBLIC_DEMO=true` for a shareable deployment. Visitors first see a display-only setup form prefilled with fictional email and API values. Submitting it stores nothing and opens a synthetic workspace. Public demo mode hides account settings, disables mailbox synchronization and action mutations, and uses an extractive local answer path. It never needs a mailbox credential or API key.
 
 Set `MULTI_USER_MODE=true` and `PUBLIC_DEMO=false` for the hosted application. Visitors register before they can access any workspace route. Account passwords are salted and hashed; mailbox credentials and DeepSeek keys are encrypted before storage; email, actions, knowledge, sync cursors, and settings live in a separate database per account. The hosted prototype uses Gmail/NetEase app passwords rather than collecting the user's normal sign-in password.
 
@@ -109,12 +109,14 @@ The regression suite covers migrations, incremental synchronization, forwarded s
 
 ## Deploy on Render
 
-The included `render.yaml` and `Dockerfile` define the authenticated multi-user application:
+The included `render.yaml` and `Dockerfile` define the safe public course demo:
 
 1. Push this repository to GitHub.
 2. In Render, create a new Blueprint and select the repository.
 3. Render reads `render.yaml`, builds the Docker image, and exposes `/health` for health checks.
-4. Render generates application-level signing and encryption secrets. Every visitor enters their own mailbox credential and DeepSeek key after registration.
+4. Visitors enter through a fictional, prefilled setup screen. The submitted display values are ignored; no mailbox or external model is contacted.
+
+To deploy the authenticated multi-user mode instead, set `PUBLIC_DEMO=false`, `DEMO_MODE=false`, and `MULTI_USER_MODE=true`, then provide persistent encrypted storage before inviting real users.
 
 Render's free service may sleep when inactive and take a short time to wake up.
 
