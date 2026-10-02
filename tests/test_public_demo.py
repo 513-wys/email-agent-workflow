@@ -37,6 +37,10 @@ class PublicDemoTests(unittest.TestCase):
         self.assertIn(b"TraceInbox", response.data)
         self.assertIn(b"From scattered messages to traceable decisions", response.data)
         self.assertIn(b'href="/demo"', response.data)
+        presenter = app.test_client().get("/presenter")
+        self.assertEqual(200, presenter.status_code)
+        self.assertIn(b"TraceInbox Presenter", presenter.data)
+        self.assertIn(b"/presentation?embedded=1", presenter.data)
 
     def test_old_synthetic_seed_is_safely_replaced(self):
         db.insert_email({

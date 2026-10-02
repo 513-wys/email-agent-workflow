@@ -202,9 +202,19 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
     }
+    body.embedded .shell { height: 100vh; min-height: 100vh; grid-template-rows: 54px 1fr 52px; }
+    body.embedded .topbar { padding-inline: 4vw; }
+    body.embedded .top-note { display: none; }
+    body.embedded .scene { gap: clamp(28px, 5vw, 72px); padding: 2vh 5vw 1.5vh; }
+    body.embedded h1 { font-size: clamp(40px, 4.8vw, 68px); }
+    body.embedded h2 { font-size: clamp(36px, 4vw, 58px); }
+    body.embedded .lead { font-size: clamp(16px, 1.25vw, 20px); }
+    body.embedded .visual { min-height: min(56vh, 440px); }
+    body.embedded .controls { padding-inline: 4vw; }
+    body.embedded .hint { display: none; }
   </style>
 </head>
-<body>
+<body class="{{ 'embedded' if request.args.get('embedded') else '' }}">
   <div class="shell">
     <header class="topbar">
       <div class="brand">
@@ -320,6 +330,9 @@
         current.textContent = String(index + 1).padStart(2, '0');
         previous.disabled = index === 0;
         next.disabled = index === scenes.length - 1;
+        if (window.parent !== window) {
+          window.parent.postMessage({type: 'traceinbox-scene', scene: index}, window.location.origin);
+        }
       }
 
       function cycleNodes() {

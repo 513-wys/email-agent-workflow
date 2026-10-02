@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101828">
+  <title>Presenter Console · TraceInbox</title>
+  <style>
+    :root {
+      --navy: #101828;
+      --navy-2: #1d2939;
+      --paper: #ffffff;
+      --ink: #111827;
+      --muted: #98a2b3;
+      --line: #344054;
+      --blue: #5b8cff;
+      --blue-strong: #155eef;
+      --green: #47cd89;
+      --console-height: 34vh;
+      --cue-size: 20px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--paper);
+      background: var(--navy);
+      font-family: Avenir Next, Avenir, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid rgba(91,140,255,.55); outline-offset: 2px; }
+    ::selection { color: white; background: var(--blue-strong); }
+
+    .console {
+      position: relative;
+      height: var(--console-height);
+      min-height: 250px;
+      display: grid;
+      grid-template-columns: minmax(250px, .72fr) minmax(520px, 1.8fr) auto;
+      gap: 28px;
+      padding: 20px 32px 24px;
+      background: var(--navy);
+      border-bottom: 1px solid var(--line);
+    }
+    .console::after {
+      content: "SHARE THE AREA BELOW THIS LINE";
+      position: absolute;
+      right: 32px;
+      bottom: -1px;
+      padding: 4px 10px;
+      color: #b9ccff;
+      background: var(--navy);
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 7px 7px 0 0;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
+    .cue-meta { display: flex; flex-direction: column; min-width: 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.02em; }
+    .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: white; background: var(--blue-strong); }
+    .brand-mark svg { width: 18px; }
+    .mode { margin-top: 18px; color: #8fb0ff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .cue-title { margin: 6px 0 0; font-size: 19px; line-height: 1.25; letter-spacing: -.02em; }
+    .cue-action { margin: 9px 0 0; color: #d0d5dd; font-size: 13px; line-height: 1.55; }
+    .cue-action strong { color: var(--green); }
+
+    .script { min-width: 0; padding-inline: 4px; overflow: auto; scrollbar-width: thin; scrollbar-color: #475467 transparent; }
+    .script-label { color: #8fb0ff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .cue-en { margin: 7px 0 0; max-width: 78ch; color: #f2f4f7; font-size: var(--cue-size); line-height: 1.48; font-weight: 560; }
+    .cue-en .current-sentence { color: white; }
+
+    .tools { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .timer { color: white; font-size: 25px; font-weight: 720; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+    .timer-label { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-align: right; text-transform: uppercase; }
+    .tool-row { display: flex; gap: 7px; }
+    .tool {
+      min-height: 34px;
+      padding: 7px 10px;
+      color: #e4e7ec;
+      background: var(--navy-2);
+      border: 1px solid #475467;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tool:hover:not(:disabled) { border-color: #8fb0ff; }
+    .tool:disabled { opacity: .35; cursor: default; }
+    .tool.primary { color: white; background: var(--blue-strong); border-color: var(--blue-strong); }
+    .cue-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+    .stage {
+      height: calc(100vh - var(--console-height));
+      min-height: 0;
+      background: #f3f5f7;
+    }
+    .stage iframe { display: block; width: 100%; height: 100%; border: 0; background: #f3f5f7; }
+
+    @media (max-width: 980px) {
+      :root { --console-height: 42vh; --cue-size: 17px; }
+      .console { grid-template-columns: 230px 1fr; gap: 20px; padding: 16px 20px 22px; }
+      .tools { position: absolute; top: 14px; right: 20px; }
+      .timer { font-size: 20px; }
+      .tool-row, .cue-count { display: none; }
+      .cue-meta { padding-top: 38px; }
+    }
+    @media (max-width: 680px) {
+      :root { --console-height: 48vh; --cue-size: 16px; }
+      .console { grid-template-columns: 1fr; gap: 12px; overflow: auto; }
+      .cue-meta { padding-top: 34px; }
+      .mode { margin-top: 10px; }
+      .console::after { right: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="console" aria-label="Private presenter notes">
+    <div class="cue-meta">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 7.25 12 12.5l7.5-5.25M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span>TraceInbox Presenter</span>
+      </div>
+      <span class="mode" id="cue-section">Opening · Scene 1</span>
+      <h1 class="cue-title" id="cue-title">用真实场景开场</h1>
+      <p class="cue-action" id="cue-action"></p>
+    </div>
+
+    <div class="script" aria-live="polite">
+      <span class="script-label">Say this in English</span>
+      <p class="cue-en" id="cue-en"></p>
+    </div>
+
+    <div class="tools">
+      <div><span class="timer" id="timer">00:00</span><span class="timer-label">Recording timer</span></div>
+      <div class="tool-row">
+        <button class="tool" id="smaller" type="button" aria-label="Make script smaller">A−</button>
+        <button class="tool" id="larger" type="button" aria-label="Make script larger">A+</button>
+        <button class="tool primary" id="timer-toggle" type="button">Start timer</button>
+      </div>
+      <div class="tool-row">
+        <button class="tool" id="cue-prev" type="button">Previous cue</button>
+        <button class="tool" id="cue-next" type="button">Next cue</button>
+      </div>
+      <span class="cue-count" id="cue-count">01 / 14</span>
+    </div>
+  </section>
+
+  <main class="stage" aria-label="Shared presentation area">
+    <iframe id="demo-stage" src="{{ url_for('presentation', embedded=1) }}" title="TraceInbox presentation and product demo"></iframe>
+  </main>
+
+  <script>
+    (() => {
+      const cues = [
+        {
+          section: 'Opening · Scene 1', title: '用真实场景开场',
+          action: '<strong>看镜头。</strong>提出两个问题；说到 “TraceInbox is my answer” 时转向屏幕。',
+          text: 'Imagine opening your inbox and seeing a deadline, a project update, a payment problem, and a security alert together. Which one needs attention first? Which email has the latest information? TraceInbox is my answer. It turns scattered emails into clear actions, connected topics, and answers with sources.'
+        },
+        {
+          section: 'Opening · Scene 2', title: '从场景自然带出问题',
+          action: '按动态页右箭头。页面出现后再说；提到 several messages 时指向第一张卡片。',
+          text: 'That is why I built TraceInbox. Email is easy to receive, but hard to organize. One task may be spread across several messages. A later email may change a deadline, and forwarding may hide the real sender. Search finds messages, but not the full story.'
+        },
+        {
+          section: 'Opening · Scene 3', title: '从问题转向解决方法',
+          action: '按右箭头。跟随 Import、Triage、Organize、Answer 的高亮顺序。',
+          text: 'So how does it turn that messy inbox into something useful? TraceInbox imports new emails, checks security, and finds the original sender. It then creates actions and groups related messages into topics. Finally, it searches the local knowledge base and answers questions with links to the source emails.'
+        },
+        {
+          section: 'Opening · Scene 4', title: '解释优势与评测',
+          action: '按右箭头，停留约 12 秒。先指 Evidence before confidence，再指评测数字。',
+          text: "Before the live demo, this page shows the main advantage: traceability. Every action and answer links back to an original email. The evaluation also shows the system's limits."
+        },
+        {
+          section: 'Opening · Scene 5', title: '过渡到产品演示',
+          action: '按右箭头。说完后点击下方 Open TraceInbox demo。',
+          text: 'With that idea in mind, let us move from the overview to the live product.'
+        },
+        {
+          section: 'Live product · Setup', title: '虚拟邮箱与首次导入',
+          action: '依次指向三个虚拟邮箱、API Key 和首次导入数量，然后点击 Import 20 demo emails。',
+          text: 'This is the first page a new user sees. Here, I enter the main mailbox I want to connect. I can also add other addresses that belong to me. For example, I may forward my university email into Gmail. TraceInbox reads the forwarding information and shows the original sender, not my own address. I can choose DeepSeek or a local Ollama model, and choose how many recent emails to import. In this demo, all values are fictional and nothing is saved or sent outside the app. I will now start the import.'
+        },
+        {
+          section: 'Live product · Dashboard', title: '导入进度与总览',
+          action: '让进度页短暂显示。进入 Dashboard 后，依次指邮件数、高优先级、隔离邮件和下一步行动。',
+          text: 'During the first import, I can see the progress instead of waiting on a blank page. This demo loads twenty connected emails. The dashboard then shows the processed emails, urgent items, quarantined messages, and my next actions. I can understand the situation before opening every message.'
+        },
+        {
+          section: 'Live product · Email', title: '邮件详情与原邮件',
+          action: '点击 Emails，打开 AX4102 邮件。指向发件人、分类、优先级、短摘要和行动，再打开模拟原邮件。',
+          text: 'I will open this course email. Here I can see the original sender, time, security result, category, priority, summary, and next action. The main point is clear before I read the full message. In the real product, “Open original in Gmail” opens the exact Gmail conversation. This demo opens a safe copy instead, so I can show the same experience without exposing private email.'
+        },
+        {
+          section: 'Live product · Actions', title: '只保留真正需要处理的事项',
+          action: '点击 Action Items。指出一个课程截止日期和 CloudNotes 付款失败事项，不必修改状态。',
+          text: 'Next, I will open Action Items. This page only shows messages that need a real action. A deadline and a failed payment stay here, but a normal newsletter does not. I can complete an item without changing the original email, and processing it again will not create a duplicate.'
+        },
+        {
+          section: 'Live product · Knowledge', title: '查看跨邮件主题',
+          action: '点击 Knowledge，打开 Project NOVA 或 AX4102，向下滚动展示按时间排列的邮件。',
+          text: 'Now I will open the knowledge base. Related emails are grouped into courses, projects, subscriptions, events, and support cases. I will open Project NOVA. Its messages appear together in time order, so I can understand the full story and later changes without searching for each email by hand.'
+        },
+        {
+          section: 'Live product · Q&A', title: '跨邮件问答与来源引用',
+          action: '提问 “What remains to be done for AX4102?” 回答出现后先指答案，再指来源邮件。',
+          text: 'I can also ask a question across all emails. I will ask, “What remains to be done for AX4102?” The system finds relevant passages and creates one clear answer. The source emails appear below it, so I can open them and check the answer instead of simply trusting the model.'
+        },
+        {
+          section: 'Live product · Digest', title: '每日晨报',
+          action: '点击 Daily Digest，指向 urgent actions 和 important updates。',
+          text: 'Finally, the daily digest separates urgent actions from important updates. Quarantined phishing content is excluded. I get a quick morning view, while every item still links back to its evidence.'
+        },
+        {
+          section: 'Evaluation', title: '诚实展示实际指标',
+          action: '手动点 Next cue。切回动态介绍第四页或报告图表，说到数字时逐项指出。',
+          text: 'I tested the project with twenty development emails, a separate holdout set, ten cross-email questions, and forty-two automated tests. DeepSeek reached 89.5 percent for intent, 73.7 percent for priority, and 79 percent for actions. Retrieval found the correct sources for all ten questions, but only six answers were fully acceptable. Answer quality is the main area to improve.'
+        },
+        {
+          section: 'Closing', title: '看向镜头结束',
+          action: '手动点 Next cue。停在 TraceInbox 标题或 GitHub 首页，看向镜头。',
+          text: 'TraceInbox provides a privacy-safe and traceable email workflow. The code, synthetic data, evaluation, report, and setup guide are all in the GitHub repository. Thank you.'
+        }
+      ];
+
+      const frame = document.getElementById('demo-stage');
+      const section = document.getElementById('cue-section');
+      const title = document.getElementById('cue-title');
+      const action = document.getElementById('cue-action');
+      const script = document.getElementById('cue-en');
+      const count = document.getElementById('cue-count');
+      const previous = document.getElementById('cue-prev');
+      const next = document.getElementById('cue-next');
+      const timer = document.getElementById('timer');
+      const timerToggle = document.getElementById('timer-toggle');
+      let cueIndex = 0;
+      let cueSize = 20;
+      let startedAt = 0;
+      let timerId = null;
+
+      function showCue(target) {
+        cueIndex = Math.max(0, Math.min(cues.length - 1, target));
+        const cue = cues[cueIndex];
+        section.textContent = cue.section;
+        title.textContent = cue.title;
+        action.innerHTML = cue.action;
+        script.textContent = cue.text;
+        count.textContent = `${String(cueIndex + 1).padStart(2, '0')} / ${String(cues.length).padStart(2, '0')}`;
+        previous.disabled = cueIndex === 0;
+        next.disabled = cueIndex === cues.length - 1;
+      }
+
+      function cueForPath(path) {
+        if (path === '/demo') return 5;
+        if (path === '/demo/import' || path === '/dashboard') return 6;
+        if (/^\/emails(?:\/|$)/.test(path)) return 7;
+        if (path === '/actions') return 8;
+        if (/^\/knowledge\/ask/.test(path)) return 10;
+        if (/^\/knowledge/.test(path)) return 9;
+        if (path === '/digest') return 11;
+        return null;
+      }
+
+      function syncFrameRoute() {
+        try {
+          const path = frame.contentWindow.location.pathname;
+          const mapped = cueForPath(path);
+          if (mapped !== null) showCue(mapped);
+        } catch (_error) {
+          // The presentation and product are same-origin in normal use.
+        }
+      }
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin || event.data?.type !== 'traceinbox-scene') return;
+        showCue(event.data.scene);
+      });
+      frame.addEventListener('load', syncFrameRoute);
+      previous.addEventListener('click', () => showCue(cueIndex - 1));
+      next.addEventListener('click', () => showCue(cueIndex + 1));
+      document.getElementById('smaller').addEventListener('click', () => {
+        cueSize = Math.max(15, cueSize - 1);
+        document.documentElement.style.setProperty('--cue-size', `${cueSize}px`);
+      });
+      document.getElementById('larger').addEventListener('click', () => {
+        cueSize = Math.min(28, cueSize + 1);
+        document.documentElement.style.setProperty('--cue-size', `${cueSize}px`);
+      });
+      timerToggle.addEventListener('click', () => {
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+          startedAt = 0;
+          timer.textContent = '00:00';
+          timerToggle.textContent = 'Start timer';
+          return;
+        }
+        startedAt = Date.now();
+        timerToggle.textContent = 'Reset timer';
+        timerId = setInterval(() => {
+          const seconds = Math.floor((Date.now() - startedAt) / 1000);
+          timer.textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+        }, 250);
+      });
+
+      showCue(0);
+    })();
+  </script>
+</body>
+</html>

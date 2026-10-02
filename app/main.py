@@ -55,7 +55,7 @@ def load_account():
         settings_store.init_table()
 
     public_endpoints = {
-        "login", "register", "health", "set_language", "static", "presentation",
+        "login", "register", "health", "set_language", "static", "presentation", "presenter_console",
         "demo_entry", "demo_start", "demo_import",
     }
     if _hosted_mode() and not _public_demo() and request.endpoint not in public_endpoints and not g.user:
@@ -170,6 +170,12 @@ def home():
 def presentation():
     """Public, self-contained opening sequence for the recorded course demo."""
     return render_template("presentation.html")
+
+
+@app.route("/presenter")
+def presenter_console():
+    """Private-on-screen cue board above an embedded, shareable demo stage."""
+    return render_template("presenter.html")
 
 
 @app.route("/demo")
