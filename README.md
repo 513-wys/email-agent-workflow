@@ -131,6 +131,18 @@ python run.py
 
 Then open <http://127.0.0.1:8000>, select Gmail or NetEase, enter an app-specific mailbox password, choose the first-import limit, and configure either a DeepSeek API key or local Ollama. Do not use a normal mailbox password. DeepSeek mode sends the selected email content to DeepSeek; Ollama keeps model inference local.
 
+### Use Outlook or an institutional mailbox through forwarding
+
+TraceInbox does not currently sign in directly to Outlook, Microsoft 365, or a university/institutional mailbox. To include those messages, configure automatic forwarding from that account to the Gmail address connected to TraceInbox:
+
+1. Open the source mailbox's web settings. In Outlook, look under **Settings → Mail → Forwarding**; institutional Microsoft 365 layouts may place the same option under **View all Outlook settings → Mail → Forwarding**.
+2. Enable automatic forwarding and enter the connected Gmail address. Keep a copy in the source mailbox if that option is available and desired.
+3. Complete any confirmation step required by the source or destination provider, then send one test message before starting a large import.
+4. In TraceInbox onboarding, list the forwarded address under the additional addresses that belong to you. This helps distinguish your forwarding account from the true external sender.
+5. Import through the connected Gmail account. TraceInbox inspects common forwarded-message headers and body markers and displays the original sender when the forwarding format is recognizable.
+
+Forwarding availability depends on the organization. Some schools disable user-controlled forwarding or require an administrator to approve it. In that case, TraceInbox cannot currently connect to that mailbox directly. Native Outlook/Microsoft Graph OAuth remains future work.
+
 The full variable list and safe placeholders are in [.env.example](.env.example). Important production values include `APP_SECRET_KEY`, `APP_ENCRYPTION_KEY`, and `COOKIE_SECURE=true`. Never commit `.env`, `data/`, credentials, or SQLite databases; they are ignored by Git and Docker.
 
 ## Run tests and evaluations
@@ -221,7 +233,7 @@ The full business and technical critique is in the [formatted Word report](deliv
 4. Evals and actual metrics — complete
 5. README, product documentation, and architecture entry point — complete in this revision
 6. English report — complete early
-7. Concise 5 ± 3 minute video script and recording — complete
+7. Concise 5 ± 3 minute recorded demonstration — complete
 
 ## License
 
