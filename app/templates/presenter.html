@@ -16,8 +16,8 @@
       --blue: #5b8cff;
       --blue-strong: #155eef;
       --green: #47cd89;
-      --console-height: 34vh;
-      --cue-size: 20px;
+      --console-height: 128px;
+      --cue-size: 16px;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -36,18 +36,17 @@
     .console {
       position: relative;
       height: var(--console-height);
-      min-height: 250px;
       display: grid;
-      grid-template-columns: minmax(250px, .72fr) minmax(520px, 1.8fr) auto;
-      gap: 28px;
-      padding: 20px 32px 24px;
+      grid-template-columns: minmax(190px, .55fr) minmax(420px, 2.2fr) auto;
+      gap: 20px;
+      padding: 12px 24px 16px;
       background: var(--navy);
       border-bottom: 1px solid var(--line);
     }
     .console::after {
       content: "SHARE THE AREA BELOW THIS LINE";
       position: absolute;
-      right: 32px;
+      right: 24px;
       bottom: -1px;
       padding: 4px 10px;
       color: #b9ccff;
@@ -59,27 +58,27 @@
       font-weight: 800;
       letter-spacing: .12em;
     }
-    .cue-meta { display: flex; flex-direction: column; min-width: 0; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.02em; }
-    .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: white; background: var(--blue-strong); }
-    .brand-mark svg { width: 18px; }
-    .mode { margin-top: 18px; color: #8fb0ff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-    .cue-title { margin: 6px 0 0; font-size: 19px; line-height: 1.25; letter-spacing: -.02em; }
-    .cue-action { margin: 9px 0 0; color: #d0d5dd; font-size: 13px; line-height: 1.55; }
+    .cue-meta { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    .brand { display: flex; align-items: center; gap: 7px; color: #d0d5dd; font-size: 11px; font-weight: 800; letter-spacing: -.01em; }
+    .brand-mark { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; color: white; background: var(--blue-strong); }
+    .brand-mark svg { width: 14px; }
+    .mode { margin-top: 7px; color: #8fb0ff; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .cue-title { margin: 3px 0 0; overflow: hidden; font-size: 16px; line-height: 1.2; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
+    .cue-action { margin: 4px 0 0; overflow: hidden; color: #d0d5dd; font-size: 11px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
     .cue-action strong { color: var(--green); }
 
-    .script { min-width: 0; padding-inline: 4px; overflow: auto; scrollbar-width: thin; scrollbar-color: #475467 transparent; }
-    .script-label { color: #8fb0ff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-    .cue-en { margin: 7px 0 0; max-width: 78ch; color: #f2f4f7; font-size: var(--cue-size); line-height: 1.48; font-weight: 560; }
+    .script { min-width: 0; align-self: center; max-height: 92px; overflow: auto; scrollbar-width: thin; scrollbar-color: #475467 transparent; }
+    .script-label { color: #8fb0ff; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .cue-en { margin: 3px 0 0; max-width: 90ch; color: #f2f4f7; font-size: var(--cue-size); line-height: 1.35; font-weight: 560; }
     .cue-en .current-sentence { color: white; }
 
-    .tools { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 12px; }
-    .timer { color: white; font-size: 25px; font-weight: 720; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-    .timer-label { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-align: right; text-transform: uppercase; }
+    .tools { display: grid; grid-template-columns: auto auto; align-content: center; align-items: center; justify-items: end; gap: 7px 8px; }
+    .timer { color: white; font-size: 20px; font-weight: 720; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+    .timer-label { display: none; }
     .tool-row { display: flex; gap: 7px; }
     .tool {
-      min-height: 34px;
-      padding: 7px 10px;
+      min-height: 30px;
+      padding: 5px 9px;
       color: #e4e7ec;
       background: var(--navy-2);
       border: 1px solid #475467;
@@ -91,7 +90,7 @@
     .tool:hover:not(:disabled) { border-color: #8fb0ff; }
     .tool:disabled { opacity: .35; cursor: default; }
     .tool.primary { color: white; background: var(--blue-strong); border-color: var(--blue-strong); }
-    .cue-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .cue-count { color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
 
     .stage {
       height: calc(100vh - var(--console-height));
@@ -101,19 +100,20 @@
     .stage iframe { display: block; width: 100%; height: 100%; border: 0; background: #f3f5f7; }
 
     @media (max-width: 980px) {
-      :root { --console-height: 42vh; --cue-size: 17px; }
-      .console { grid-template-columns: 230px 1fr; gap: 20px; padding: 16px 20px 22px; }
-      .tools { position: absolute; top: 14px; right: 20px; }
-      .timer { font-size: 20px; }
-      .tool-row, .cue-count { display: none; }
-      .cue-meta { padding-top: 38px; }
+      :root { --console-height: 142px; --cue-size: 14px; }
+      .console { grid-template-columns: 165px 1fr; gap: 14px; padding: 10px 16px 16px; }
+      .tools { position: absolute; top: 9px; right: 16px; display: flex; flex-direction: row; }
+      .tool-row:last-of-type, .cue-count { display: none; }
+      .script { padding-right: 170px; }
     }
     @media (max-width: 680px) {
-      :root { --console-height: 48vh; --cue-size: 16px; }
-      .console { grid-template-columns: 1fr; gap: 12px; overflow: auto; }
-      .cue-meta { padding-top: 34px; }
-      .mode { margin-top: 10px; }
-      .console::after { right: 20px; }
+      :root { --console-height: 150px; --cue-size: 13px; }
+      .console { grid-template-columns: 132px 1fr; gap: 10px; }
+      .brand span:last-child, .cue-action, .script-label { display: none; }
+      .script { max-height: 105px; padding-right: 0; }
+      .tools { top: 8px; right: 12px; }
+      .tool-row { display: none; }
+      .console::after { right: 12px; }
     }
   </style>
 </head>
@@ -141,6 +141,7 @@
       <div class="tool-row">
         <button class="tool" id="smaller" type="button" aria-label="Make script smaller">A−</button>
         <button class="tool" id="larger" type="button" aria-label="Make script larger">A+</button>
+        <button class="tool" id="fullscreen" type="button" aria-label="Enter full screen">Full screen</button>
         <button class="tool primary" id="timer-toggle" type="button">Start timer</button>
       </div>
       <div class="tool-row">
@@ -240,8 +241,9 @@
       const next = document.getElementById('cue-next');
       const timer = document.getElementById('timer');
       const timerToggle = document.getElementById('timer-toggle');
+      const fullscreen = document.getElementById('fullscreen');
       let cueIndex = 0;
-      let cueSize = 20;
+      let cueSize = 16;
       let startedAt = 0;
       let timerId = null;
 
@@ -286,12 +288,26 @@
       previous.addEventListener('click', () => showCue(cueIndex - 1));
       next.addEventListener('click', () => showCue(cueIndex + 1));
       document.getElementById('smaller').addEventListener('click', () => {
-        cueSize = Math.max(15, cueSize - 1);
+        cueSize = Math.max(12, cueSize - 1);
         document.documentElement.style.setProperty('--cue-size', `${cueSize}px`);
       });
       document.getElementById('larger').addEventListener('click', () => {
-        cueSize = Math.min(28, cueSize + 1);
+        cueSize = Math.min(22, cueSize + 1);
         document.documentElement.style.setProperty('--cue-size', `${cueSize}px`);
+      });
+      fullscreen.addEventListener('click', async () => {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          } else {
+            await document.documentElement.requestFullscreen();
+          }
+        } catch (_error) {
+          // Browsers can reject full-screen requests outside a direct user gesture.
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        fullscreen.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
       });
       timerToggle.addEventListener('click', () => {
         if (timerId) {
