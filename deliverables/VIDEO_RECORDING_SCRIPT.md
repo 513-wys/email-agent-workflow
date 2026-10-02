@@ -13,45 +13,55 @@
 
 ## 0:00–1:25｜项目介绍
 
-### 0:00–0:20｜第一页：项目是什么
+### 0:00–0:22｜第一页：用真实场景开场
 
 **操作提示（中文）：**
 
-打开 `/presentation`，停留在标题页。先看镜头说第一句，然后把视线转向屏幕。
+打开 `/presentation`，停留在标题页。前两个问题看着镜头说；说到 “TraceInbox is my answer” 时，再把视线和鼠标转向屏幕上的标题。
 
 **英文口播：**
 
-> Hello, my project is TraceInbox. It turns scattered emails into clear actions, connected topics, and answers with sources. I built it for students and knowledge workers who receive important updates from several email accounts.
+> Imagine opening your inbox and seeing a deadline, a project update, a payment problem, and a security alert together. Which one needs attention first? Which email has the latest information? TraceInbox is my answer. It turns scattered emails into clear actions, connected topics, and answers with sources.
 
-### 0:20–0:43｜第二页：为什么做这个项目
+### 0:22–0:43｜第二页：从场景自然带出问题
 
 **操作提示（中文）：**
 
-按一次右方向键，进入 “The problem”。说到 “one topic” 时，可以用鼠标指一下右侧第一张卡片。
+说完第一页的 “answers with sources” 后，按一次右方向键。等第二页完全出现，再说第一句。说到 “several messages” 时，用鼠标指向右侧第一张卡片。
 
 **英文口播：**
 
-> The problem is simple. One task is often spread across several emails. A later email may change a deadline, and a forwarded message may hide the real sender. Search can find a message, but it does not always explain what changed or what I should do next.
+> That is why I built TraceInbox. Email is easy to receive, but hard to organize. One task may be spread across several messages. A later email may change a deadline, and forwarding may hide the real sender. Search finds messages, but not the full story.
 
-### 0:43–1:07｜第三页：系统如何工作
+### 0:43–1:06｜第三页：从问题转向解决方法
 
 **操作提示（中文）：**
 
-再按一次右方向键。页面会依次突出 Import、Triage、Organize 和 Answer。跟着高亮顺序介绍。
+说完 “not the full story” 后按右方向键。第三页出现后，用第一句话承接前面的问题。随后跟着 Import、Triage、Organize 和 Answer 的高亮顺序介绍。
 
 **英文口播：**
 
-> TraceInbox has four steps. It imports new emails, checks security, and finds the original sender. It then creates useful actions and groups related emails into topics. Finally, it searches the local email knowledge base and answers questions with links to the source messages.
+> So how does it turn that messy inbox into something useful? TraceInbox imports new emails, checks security, and finds the original sender. It then creates actions and groups related messages into topics. Finally, it searches the local knowledge base and answers questions with links to the source emails.
 
-### 1:07–1:25｜第四、五页：优势和进入演示
+### 1:06–1:18｜第四页：单独解释优势和评测
 
 **操作提示（中文）：**
 
-切到评测数据页，稍停两秒；再切到最后一页，点击 “Open TraceInbox demo”。
+按右方向键进入第四页，并停留大约 12 秒。先指向 “Evidence before confidence”，再指向下方评测数字。这里不是只停两秒，而是完整讲完下面这段话。
 
 **英文口播：**
 
-> The key idea is traceability. The user can always check where an action or answer came from. TraceInbox is bilingual, supports several mailbox sources, and does not let the language model make security decisions. Now I will show the full workflow with safe synthetic emails.
+> Before the live demo, this page shows the main advantage: traceability. Every action and answer links back to an original email. The evaluation also shows the system's limits.
+
+### 1:18–1:25｜第五页：过渡到真实产品
+
+**操作提示（中文）：**
+
+讲完第四页的 “system's limits” 后，再按一次右方向键。第五页出现后，说下面这句；说完再点击 “Open TraceInbox demo”。这样第五页承担的是正式转场作用。
+
+**英文口播：**
+
+> With that idea in mind, let us move from the overview to the live product.
 
 ---
 
