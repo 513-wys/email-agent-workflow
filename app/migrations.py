@@ -1,4 +1,4 @@
-"""SQLite schema migrations for the local Email Agent database."""
+"""SQLite schema migrations for the local TraceInbox database."""
 
 import hashlib
 import inspect

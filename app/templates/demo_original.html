@@ -10,7 +10,7 @@
   <header class="mail-preview-topbar">
     <span class="mail-preview-logo"><span>G</span>mail</span>
     <span class="demo-pill">{{ 'Synthetic preview' if lang == 'en' else '合成数据预览' }}</span>
-    <a href="{{ url_for('email_detail', email_id=e.id) }}">{{ 'Back to Email Agent' if lang == 'en' else '返回邮件助手' }}</a>
+    <a href="{{ url_for('email_detail', email_id=e.id) }}">{{ 'Back to TraceInbox' if lang == 'en' else '返回 TraceInbox' }}</a>
   </header>
   <main class="mail-preview-layout">
     <aside class="mail-preview-sidebar" aria-label="{{ 'Mailbox folders' if lang == 'en' else '邮箱文件夹' }}">
