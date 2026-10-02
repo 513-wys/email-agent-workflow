@@ -77,7 +77,7 @@ The project deliberately separates known-set regression, held-out evaluation, li
 | Real DeepSeek triage on synthetic mail | Intent 89.5%; priority 73.7%; action decision 79.0%; exact deadline 73.7%; API success 100% |
 | Real DeepSeek cross-email answers | Exact source sets 100%; 6/10 fully acceptable; author semantic score 79%; one material security contradiction |
 | Performance | Triage median/P95 1.723/2.154 s; answer median/P95 40.894/51.896 s |
-| Automated software tests | 41 passed |
+| Automated software tests | 42 passed |
 
 Targets and reached values, including failed targets, are in [evals/results/metrics_summary.md](evals/results/metrics_summary.md). Raw model predictions and answers are preserved in [model_evaluation.json](evals/results/model_evaluation.json); the question-by-question semantic review is in [model_answer_human_review.md](evals/results/model_answer_human_review.md). The semantic review is author-scored and is not represented as an independent human study.
 
@@ -211,8 +211,7 @@ The full business and technical critique is in the [formatted Word report](deliv
 | Legible module-level code documentation | Module docstrings and repository guide above | Complete |
 | Persona, input, output, architecture | Sections above plus [ARCHITECTURE.md](ARCHITECTURE.md) | Complete |
 | Metrics targeted and reached | [evals/results/metrics_summary.md](evals/results/metrics_summary.md) | Complete |
-| Recorded demo, face and screen visible, 5 ± 3 minutes | Video and final link | Pending |
-| Final privacy/submission audit | Planned after the video materials are added | Pending |
+| Recorded demo, face and screen visible, 5 ± 3 minutes | Recording completed; submission link is supplied with the course hand-in | Complete |
 
 ## Current completion sequence
 
@@ -222,8 +221,7 @@ The full business and technical critique is in the [formatted Word report](deliv
 4. Evals and actual metrics — complete
 5. README, product documentation, and architecture entry point — complete in this revision
 6. English report — complete early
-7. Concise 5 ± 3 minute video script and recording plan — next
-8. Final privacy, repository, deployment, and submission audit — pending
+7. Concise 5 ± 3 minute video script and recording — complete
 
 ## License
 
