@@ -1,119 +1,187 @@
-# TraceInbox Five-Minute Demo Recording Script
+# TraceInbox 五分钟演示录制脚本
 
-## Recording setup
+## 录制前准备
 
-- Record in 16:9 at 1080p. Keep your face visible throughout, as required by the course.
-- Open `/presentation` first and the public TraceInbox demo in a second tab. Let Render wake up before recording.
-- Use the left and right arrow keys to move through the introduction. The last scene opens the live demo.
-- Use 90–100% browser zoom. Close personal tabs, notifications, password managers, and anything showing real email, API keys, `.env` values, or databases.
-- Speak at roughly 125–135 words per minute. The target runtime is about five minutes.
+- 画面比例使用 16:9、1080p。按照老师要求，整个视频都要让脸和电脑画面同时可见。
+- 提前打开两个页面：动态介绍页 `/presentation` 和公开演示版首页 `/`。
+- 提前唤醒 Render，确认每个页面都可以正常打开后再开始录制。
+- 浏览器缩放保持在 90–100%。关闭通知、私人标签页以及任何真实邮箱、API Key、`.env` 或数据库画面。
+- 动态介绍页使用键盘左右方向键切换。
+- 英文正文约 620–650 词。保持自然语速，不需要刻意说快。
 
-## 0:00–1:38 — Dynamic introduction
+---
 
-### 0:00–0:20 — Scene 1: Title
+## 0:00–1:25｜项目介绍
 
-**On screen:** Open `/presentation`. Stay on “From scattered messages to traceable decisions.”
+### 0:00–0:20｜第一页：项目是什么
 
-**Say:**
+**操作提示（中文）：**
 
-> Hello, my project is TraceInbox, a privacy-aware email intelligence workspace. It turns scattered email messages into traceable decisions, while keeping the original messages visible as evidence. I built it for students and knowledge workers who receive deadlines, project updates, security notices and subscriptions across several inboxes.
+打开 `/presentation`，停留在标题页。先看镜头说第一句，然后把视线转向屏幕。
 
-### 0:20–0:48 — Scene 2: Why this project exists
+**英文口播：**
 
-**On screen:** Press the right arrow once.
+> Hello, my project is TraceInbox. It turns scattered emails into clear actions, connected topics, and answers with sources. I built it for students and knowledge workers who receive important updates from several email accounts.
 
-**Say:**
+### 0:20–0:43｜第二页：为什么做这个项目
 
-> The problem is that one topic rarely lives in one email. A later message may change a deadline, routine subscription mail can look like a task, and forwarded university mail can hide the real sender. Normal inbox search can find keywords, but it does not reliably explain what changed, what still needs action, or which message supports the answer.
+**操作提示（中文）：**
 
-### 0:48–1:18 — Scene 3: Product workflow
+按一次右方向键，进入 “The problem”。说到 “one topic” 时，可以用鼠标指一下右侧第一张卡片。
 
-**On screen:** Press the right arrow. Let the four workflow stages animate.
+**英文口播：**
 
-**Say:**
+> The problem is simple. One task is often spread across several emails. A later email may change a deadline, and a forwarded message may hide the real sender. Search can find a message, but it does not always explain what changed or what I should do next.
 
-> TraceInbox uses a read-only workflow. It imports new messages incrementally, recovers original senders, runs deterministic security checks, and then uses DeepSeek or local Ollama for structured analysis. It extracts priorities, summaries, deadlines and action items. Related emails become knowledge topics, and the question-answering view retrieves local evidence before generating a cited answer.
+### 0:43–1:07｜第三页：系统如何工作
 
-### 1:18–1:38 — Scenes 4 and 5: Advantage and hand-off
+**操作提示（中文）：**
 
-**On screen:** Show the evaluation scene, then move to the final scene and select “Open TraceInbox demo.”
+再按一次右方向键。页面会依次突出 Import、Triage、Organize 和 Answer。跟着高亮顺序介绍。
 
-**Say:**
+**英文口播：**
 
-> The main advantage is traceability. Every important answer links back to source emails. The product is bilingual, supports multiple mailbox sources, and keeps security-critical state outside the model. I also report model failures rather than presenting the tuned regression score as production accuracy. Now I will demonstrate the complete public workflow using safe synthetic data.
+> TraceInbox has four steps. It imports new emails, checks security, and finds the original sender. It then creates useful actions and groups related emails into topics. Finally, it searches the local email knowledge base and answers questions with links to the source messages.
 
-## 1:38–4:27 — Live product walkthrough
+### 1:07–1:25｜第四、五页：优势和进入演示
 
-### 1:38–2:05 — Demo entry and dashboard
+**操作提示（中文）：**
 
-**On screen:** Show the three sample accounts and display-only API key, then enter the demo and show the dashboard.
+切到评测数据页，稍停两秒；再切到最后一页，点击 “Open TraceInbox demo”。
 
-**Say:**
+**英文口播：**
 
-> The public version mirrors the real setup but cannot access a mailbox or external model. These three accounts and the API key are fictional and ignored. The demonstration imports 20 interrelated emails. The dashboard immediately shows processed mail, high-priority items, quarantined messages and the next actions, so the user can see what deserves attention before reading every email.
+> The key idea is traceability. The user can always check where an action or answer came from. TraceInbox is bilingual, supports several mailbox sources, and does not let the language model make security decisions. Now I will show the full workflow with safe synthetic emails.
 
-### 2:05–2:35 — Email detail and original-message link
+---
 
-**On screen:** Open one representative course or project email. Point to sender recovery, classification, summary, action and “Open original.” Briefly open the simulated original, then return.
+## 1:25–4:30｜边操作边讲解产品
 
-**Say:**
+### 1:25–2:00｜首页：连接邮箱和首次导入
 
-> Each email keeps its recovered sender, received time, security result, classification, priority, bilingual summary and extracted action. Forwarded messages display the original sender instead of incorrectly showing the account owner. In a connected Gmail account, this button uses the exact Gmail thread ID. In the public demo it opens a simulated original, preserving the same end-to-end interaction without exposing personal data.
+**操作提示（中文）：**
 
-### 2:35–2:58 — Action items
+1. 进入公开演示首页后，先把鼠标放在 “Connected mailbox” 输入框上。
+2. 再指向其他邮箱地址区域。
+3. 指向 API Key 和首次导入数量。
+4. 点击进入演示或开始导入的按钮。
 
-**On screen:** Open “Action Items.” Show a deadline and the CloudNotes billing action. Mark one sample item complete only if you can immediately restore the demo state.
+**英文口播：**
 
-**Say:**
+> This is the first page a new user sees. Here, I enter the main mailbox I want to connect. I can also add other addresses that belong to me. For example, I may forward my university email into Gmail. TraceInbox reads the forwarding information and shows the original sender, not my own address.
+>
+> I can choose DeepSeek or a local Ollama model, and choose how many recent emails to import. The default is one hundred. In this demo, all values are fictional and nothing is saved or sent outside the app. I will now start the import.
 
-> Action items are generated only when the message requires a real user decision. Informational newsletters stay out of this view, while a failed payment or submission deadline remains visible. Reprocessing is idempotent, so it does not create duplicate tasks. Completing an item here also never changes or deletes the original email.
+### 2:00–2:25｜导入进度和 Dashboard
 
-### 2:58–3:40 — Topic knowledge base
+**操作提示（中文）：**
 
-**On screen:** Open “Knowledge.” Select Project NOVA or the course topic and scroll through the grouped source emails.
+1. 让导入进度页短暂显示。
+2. 完成后进入 Dashboard。
+3. 鼠标依次指向 Emails processed、High priority、Quarantined 和 Next actions。
 
-**Say:**
+**英文口播：**
 
-> The knowledge page is more than another to-do list. It groups related messages into topics such as courses, projects, subscriptions, events and support cases. Opening a topic shows the messages that formed it in chronological context. This lets the user understand a continuing situation before asking a question, and it makes the system’s internal organization directly inspectable.
+> During the first import, I can see the progress instead of waiting on a blank page. This demo loads twenty connected emails. The dashboard then shows the processed emails, urgent items, quarantined messages, and my next actions. I can understand the situation before opening every message.
 
-### 3:40–4:08 — Cross-email question answering
+### 2:25–2:58｜邮件详情和原邮件跳转
 
-**On screen:** Open the Q and A view. Use a published demo question such as “What remains to be done for AX4102?” Point to the answer and its separate source list.
+**操作提示（中文）：**
 
-**Say:**
+1. 点击 Emails。
+2. 打开一封有代表性的课程邮件，例如 AX4102。
+3. 指向真实发件人、分类、优先级、中文/英文摘要和行动事项。
+4. 点击 “View simulated original email”，展示模拟 Gmail 原邮件，然后返回。
 
-> For cross-email questions, relevant passages are retrieved locally. Only the selected evidence and question would be sent to the configured model in the full version. The answer combines the required repository, video, report, data and evaluation files, then cites the supporting email. The source list is deliberately separate from the prose so the user can verify every claim.
+**英文口播：**
 
-### 4:08–4:27 — Daily digest
+> I will open this course email. Here I can see the original sender, time, security result, category, priority, summary, and next action. The main point is clear before I read the full message.
+>
+> In the real product, “Open original in Gmail” opens the exact Gmail conversation. This demo opens a safe copy instead, so I can show the same experience without exposing private email.
 
-**On screen:** Open “Daily Digest.” Point to urgent actions and concise updates.
+### 2:58–3:20｜行动事项
 
-**Say:**
+**操作提示（中文）：**
 
-> The daily digest compresses the mailbox into urgent actions and concise updates. Quarantined phishing content is excluded, and related actions use enough context to explain what must be done. This provides a quick morning view without replacing the underlying evidence.
+1. 点击顶部导航栏的 Action Items。
+2. 指向一个课程截止日期和 CloudNotes 付款失败事项。
+3. 不必真的修改状态；只指出完成按钮即可。
 
-## 4:27–5:00 — Evaluation and close
+**英文口播：**
 
-### 4:27–4:52 — Evaluation results
+> Next, I will open Action Items. This page only shows messages that need a real action. A deadline and a failed payment stay here, but a normal newsletter does not. I can complete an item without changing the original email, and processing it again will not create a duplicate.
 
-**On screen:** Return to presentation scene 4, or show the report’s evaluation chart.
+### 3:20–3:52｜主题知识库
 
-**Say:**
+**操作提示（中文）：**
 
-> I evaluated the system with 20 transparent development emails, a separate frozen holdout, ten cross-email questions and 42 automated tests. In the real DeepSeek run, intent accuracy was 89.5 percent, priority accuracy 73.7 percent, and action accuracy 79 percent. Retrieval found the exact expected sources for all ten development questions, but only six answers were fully acceptable, and one legitimate security alert was wrongly described as phishing. This is the main reliability gap.
+1. 点击 Knowledge。
+2. 先停留在主题列表，让观众看到不同主题。
+3. 打开 Project NOVA 或 AX4102。
+4. 向下滚动，展示同一主题下按时间排列的多封邮件。
 
-### 4:52–5:00 — Closing
+**英文口播：**
 
-**On screen:** End on the TraceInbox title or GitHub repository landing page.
+> Now I will open the knowledge base. Related emails are grouped into courses, projects, subscriptions, events, and support cases. I will open Project NOVA. Its messages appear together in time order, so I can understand the full story and later changes without searching for each email by hand.
 
-**Say:**
+### 3:52–4:15｜跨邮件问答和来源引用
 
-> TraceInbox demonstrates a complete, privacy-safe and inspectable email workflow. The code, synthetic data, evaluation scripts, raw results, report and run instructions are all available in the GitHub repository. Thank you.
+**操作提示（中文）：**
 
-## Recording fallback notes
+1. 进入问答区域。
+2. 输入或选择示例问题：`What remains to be done for AX4102?`
+3. 点击 Ask。
+4. 回答出现后，先指答案，再指下方来源邮件列表。
 
-- If Render is sleeping, wait for it to wake before starting the recording; do not spend video time on the loading screen.
-- If the question-answering page is slow, use the published example question and its existing auditable answer.
-- Keep the path linear: **dashboard → message → action → topic → answer → digest → evaluation**.
-- Do not explain every field. Narrate the user value, show the evidence, and move on.
-- If the first take exceeds five minutes, shorten mouse movement and page scrolling before cutting evaluation or limitations.
+**英文口播：**
+
+> I can also ask a question across all emails. I will ask, “What remains to be done for AX4102?” The system finds relevant passages and creates one clear answer. The source emails appear below it, so I can open them and check the answer instead of simply trusting the model.
+
+### 4:15–4:30｜每日晨报
+
+**操作提示（中文）：**
+
+点击 Daily Digest，指向 Urgent actions 和 Important updates 两个区域。
+
+**英文口播：**
+
+> Finally, the daily digest separates urgent actions from important updates. Quarantined phishing content is excluded. I get a quick morning view, while every item still links back to its evidence.
+
+---
+
+## 4:30–5:00｜评测和总结
+
+### 4:30–4:52｜展示真实评测结果
+
+**操作提示（中文）：**
+
+切回动态介绍页的第四页，或者展示 Word 报告里的评测图表。说到每一个数字时，用鼠标指向对应数据。
+
+**英文口播：**
+
+> I tested the project with twenty development emails, a separate holdout set, ten cross-email questions, and forty-two automated tests. DeepSeek reached 89.5 percent for intent, 73.7 percent for priority, and 79 percent for actions. Retrieval found the correct sources for all ten questions, but only six answers were fully acceptable. Answer quality is the main area to improve.
+
+### 4:52–5:00｜结束
+
+**操作提示（中文）：**
+
+停在 TraceInbox 标题页或 GitHub 仓库首页，看向镜头完成最后一句。
+
+**英文口播：**
+
+> TraceInbox provides a privacy-safe and traceable email workflow. The code, synthetic data, evaluation, report, and setup guide are all in the GitHub repository. Thank you.
+
+---
+
+## 最终录制路线
+
+`动态介绍 → 首页设置 → 导入进度 → Dashboard → Emails → 邮件详情 → Simulated original → Action Items → Knowledge → Cross-email Q&A → Daily Digest → 评测结果 → 结束`
+
+## 录制时的实用提醒
+
+- 每次点击后先等页面稳定半秒，再继续讲话。
+- 鼠标只在你正在介绍的位置停留，不要无目的地快速移动。
+- 不要逐字段读页面；重点说明“用户为什么需要它”和“这个动作解决了什么问题”。
+- 如果 Render 需要唤醒，请在正式录制前完成，不要把加载过程录进去。
+- 如果问答生成较慢，使用已经准备好的示例问题和演示答案。
+- 如果超过五分钟，先减少滚动和鼠标停顿，不要删掉评测结果和项目局限。
