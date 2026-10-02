@@ -16,10 +16,10 @@ from app.mail_links import gmail_message_url
 DEMO_EMAILS = [
     {
         "message_id": "demo-phish-001",
-        "from": "billing@paypa1-security-alerts.net",
+        "from": "billing@paypa1-security-alerts.example.net",
         "subject": "紧急：您的账户存在异常，请立即验证",
         "body_text": (
-            "尊敬的客户，您的账户已被锁定。请点击 http://paypa1-security-alerts.net/verify "
+            "尊敬的客户，您的账户已被锁定。请点击 http://paypa1-security-alerts.example.net/verify "
             "输入您的密码与银行卡信息以恢复访问，否则账户将在 24 小时内注销。"
         ),
         "date": "2026-09-02 09:00",
@@ -27,7 +27,7 @@ DEMO_EMAILS = [
     },
     {
         "message_id": "demo-biz-001",
-        "from": "alice@partner-corp.com",
+        "from": "alice@partner.example.com",
         "subject": "Q3 业务合作方案及报价咨询",
         "body_text": (
             "你好，我们希望探讨 Q3 季度在 AI 工作流自动化方面的合作，"
@@ -38,7 +38,7 @@ DEMO_EMAILS = [
     },
     {
         "message_id": "demo-news-001",
-        "from": "noreply@medium.com",
+        "from": "newsletter@publisher.example.com",
         "subject": "本周 AI 行业精选文章",
         "body_text": "本周为您精选了 5 篇 AI 行业深度文章，点击查看。",
         "date": "2026-09-02 08:00",
@@ -46,7 +46,7 @@ DEMO_EMAILS = [
     },
     {
         "message_id": "demo-en-001",
-        "from": "bob@acme-global.com",
+        "from": "bob@acme.example.com",
         "subject": "Request for pricing on AI automation solution",
         "body_text": (
             "Hi, we are evaluating AI workflow automation vendors for our ops team. "

@@ -57,8 +57,8 @@ def init_db():
         conn.executemany(
             "INSERT INTO contacts(email,name,tier,deal_stage) VALUES(?,?,?,?)",
             [
-                ("alice@partner-corp.com", "王女士", "VIP企业", "谈判中"),
-                ("bob@acme-global.com", "Bob Chen", "普通客户", "接洽中"),
+                ("alice@partner.example.com", "王女士", "VIP企业", "谈判中"),
+                ("bob@acme.example.com", "Bob Chen", "普通客户", "接洽中"),
             ],
         )
         conn.commit()
