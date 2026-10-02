@@ -39,6 +39,7 @@
       </div>
 
       <form method="post" action="{{ url_for('demo_start') }}" class="auth-form demo-entry-form">
+        {% if multi_user %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
         <div class="demo-account-stack" aria-label="{{ 'Demo mailbox sources' if lang == 'en' else '演示邮箱来源' }}">
           <div class="demo-account-card">
             <span class="provider-mark provider-google">G</span>

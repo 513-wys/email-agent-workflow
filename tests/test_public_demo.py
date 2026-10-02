@@ -11,10 +11,13 @@ class PublicDemoTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.db_patch = patch("app.config.DB_PATH", Path(self.tmp.name) / "demo.db")
+        self.user_data_patch = patch("app.config.USER_DATA_DIR", Path(self.tmp.name) / "users")
         self.db_patch.start()
+        self.user_data_patch.start()
         db.init_db()
 
     def tearDown(self):
+        self.user_data_patch.stop()
         self.db_patch.stop()
         self.tmp.cleanup()
 
@@ -33,6 +36,7 @@ class PublicDemoTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIn(b"TraceInbox", response.data)
         self.assertIn(b"From scattered messages to traceable decisions", response.data)
+        self.assertIn(b'href="/demo"', response.data)
 
     def test_old_synthetic_seed_is_safely_replaced(self):
         db.insert_email({
@@ -132,12 +136,23 @@ class PublicDemoTests(unittest.TestCase):
             self.assertIn(b"Project NOVA", digest.data)
             self.assertNotIn(b"mailbox suspension", digest.data)
 
-    def test_demo_start_is_unavailable_outside_public_demo(self):
+    def test_explicit_demo_entry_uses_isolated_synthetic_workspace(self):
         app.config.update(TESTING=True, SECRET_KEY="test-secret")
-        with patch.object(config, "PUBLIC_DEMO", False), patch.object(config, "MULTI_USER_MODE", False):
-            response = app.test_client().post("/demo/start")
-        self.assertEqual(302, response.status_code)
-        self.assertTrue(response.headers["Location"].endswith("/"))
+        with patch.object(config, "PUBLIC_DEMO", False), patch.object(config, "MULTI_USER_MODE", True):
+            client = app.test_client()
+            entry = client.get("/demo")
+            self.assertEqual(200, entry.status_code)
+            self.assertIn(b"demo.student@example.com", entry.data)
+            with client.session_transaction() as current_session:
+                csrf_token = current_session["csrf_token"]
+            response = client.post("/demo/start", data={"csrf_token": csrf_token})
+            self.assertEqual(302, response.status_code)
+            self.assertTrue(response.headers["Location"].endswith("/demo/import"))
+            progress = client.get("/demo/import")
+            self.assertEqual(200, progress.status_code)
+            dashboard = client.get("/dashboard")
+            self.assertEqual(200, dashboard.status_code)
+            self.assertIn(b"AX4102", dashboard.data)
 
 
 if __name__ == "__main__":

@@ -12,10 +12,16 @@ from app import config
 
 
 _workspace_id = ContextVar("workspace_id", default=None)
+DEMO_WORKSPACE_ID = -1
 
 
 def current_id():
     return _workspace_id.get()
+
+
+def is_demo_workspace():
+    """Return whether the current request is bound to the isolated public sandbox."""
+    return current_id() == DEMO_WORKSPACE_ID
 
 
 def bind(workspace_id):

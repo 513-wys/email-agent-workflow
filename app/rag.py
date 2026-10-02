@@ -2,7 +2,7 @@
 import re
 import uuid
 
-from app import config, db, demo_answers, llm
+from app import config, db, demo_answers, llm, tenant
 
 
 def _terms(text, expand=False):
@@ -112,7 +112,7 @@ def answer(question, topic_id=None):
             "There is not enough relevant email evidence to answer this question."
         )
         return {"answer": message, "sources": []}
-    if config.PUBLIC_DEMO:
+    if config.PUBLIC_DEMO or tenant.is_demo_workspace():
         curated = demo_answers.answer_for(question)
         if curated:
             return {"answer": curated, "sources": sources}

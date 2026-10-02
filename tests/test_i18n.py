@@ -26,7 +26,8 @@ class I18nTests(unittest.TestCase):
         self.client = app.test_client()
 
     def test_english_is_default(self):
-        response = self.client.get("/", follow_redirects=True)
+        with patch("app.main.settings_store.get", side_effect=lambda key, default=None: "1" if key == "initial_sync_completed" else default):
+            response = self.client.get("/", follow_redirects=True)
         self.assertEqual(200, response.status_code)
         self.assertIn(b"Enter workspace", response.data)
         self.assertIn(b'<html lang="en">', response.data)

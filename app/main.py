@@ -34,19 +34,33 @@ def _hosted_mode():
     return config.MULTI_USER_MODE and not config.PUBLIC_DEMO
 
 
+def _public_demo():
+    """True for the dedicated demo deployment or an explicit isolated demo session."""
+    return config.PUBLIC_DEMO or bool(session.get("public_demo_session"))
+
+
 @app.before_request
 def load_account():
-    g.user = auth.get_user(session.get("user_id")) if _hosted_mode() else None
+    g.user = auth.get_user(session.get("user_id")) if _hosted_mode() and not _public_demo() else None
     g.tenant_token = None
-    if g.user:
+    if _public_demo() and not config.PUBLIC_DEMO:
+        g.tenant_token = tenant.bind(tenant.DEMO_WORKSPACE_ID)
+        db.init_db()
+        settings_store.init_table()
+        demo_seed.seed()
+        settings_store.set("initial_sync_completed", "1")
+    elif g.user:
         g.tenant_token = tenant.bind(g.user["id"])
         db.init_db()
         settings_store.init_table()
 
-    public_endpoints = {"login", "register", "health", "set_language", "static", "presentation"}
-    if _hosted_mode() and request.endpoint not in public_endpoints and not g.user:
+    public_endpoints = {
+        "login", "register", "health", "set_language", "static", "presentation",
+        "demo_entry", "demo_start", "demo_import",
+    }
+    if _hosted_mode() and not _public_demo() and request.endpoint not in public_endpoints and not g.user:
         return redirect(url_for("login", next=request.path))
-    if _hosted_mode() and request.method == "POST":
+    if _hosted_mode() and not _public_demo() and request.method == "POST":
         if not auth.valid_csrf(request.form.get("csrf_token") or request.headers.get("X-CSRF-Token")):
             abort(400, description="The form expired. Reload the page and try again.")
 
@@ -67,7 +81,7 @@ def inject_i18n():
         "status_label": lambda value: status_label(lang, value),
         "category_label": lambda email: category_label(lang, email.get("intent"), email.get("category")),
         "priority_label": lambda value: priority_label(lang, value),
-        "public_demo": config.PUBLIC_DEMO,
+        "public_demo": _public_demo(),
         "multi_user": _hosted_mode(),
         "current_user": getattr(g, "user", None),
         "csrf_token": auth.csrf_token,
@@ -145,7 +159,7 @@ def set_language(lang):
 
 @app.route("/")
 def home():
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         return render_template("demo_entry.html")
     if settings_store.get("initial_sync_completed", "0") != "1":
         return redirect(url_for("onboarding"))
@@ -158,12 +172,17 @@ def presentation():
     return render_template("presentation.html")
 
 
+@app.route("/demo")
+def demo_entry():
+    """Stable public entry for the isolated synthetic product walkthrough."""
+    return render_template("demo_entry.html")
+
+
 @app.route("/demo/start", methods=["POST"])
 def demo_start():
     """Enter the public sandbox without retaining or validating display-only values."""
-    if not config.PUBLIC_DEMO:
-        return redirect(url_for("home"))
     session.clear()
+    session["public_demo_session"] = True
     session["demo_entered"] = True
     session.permanent = False
     return redirect(url_for("demo_import"))
@@ -171,14 +190,14 @@ def demo_start():
 
 @app.route("/demo/import")
 def demo_import():
-    if not config.PUBLIC_DEMO or not session.get("demo_entered"):
-        return redirect(url_for("home"))
+    if not _public_demo() or not session.get("demo_entered"):
+        return redirect(url_for("demo_entry"))
     return render_template("demo_import.html", total=20)
 
 
 @app.route("/demo/original/<int:email_id>")
 def demo_original(email_id):
-    if not config.PUBLIC_DEMO:
+    if not _public_demo():
         return redirect(url_for("email_detail", email_id=email_id))
     email = db.get_email(email_id)
     if not email or (email.get("provider") or "").upper() != "DEMO":
@@ -215,7 +234,7 @@ def enter_workspace():
 
 @app.route("/ingest", methods=["POST"])
 def ingest():
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         return redirect(url_for("dashboard", demo="readonly"))
     if settings_store.get("initial_sync_completed", "0") != "1":
         return redirect(url_for("onboarding"))
@@ -237,7 +256,7 @@ def ingest():
 
 @app.route("/onboarding")
 def onboarding():
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         return redirect(url_for("dashboard"))
     if settings_store.get("initial_sync_completed", "0") == "1":
         return redirect(url_for("dashboard"))
@@ -252,7 +271,7 @@ def onboarding():
 
 @app.route("/onboarding/start", methods=["POST"])
 def onboarding_start():
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         return redirect(url_for("dashboard"))
     provider = request.form.get("mail_provider", "gmail")
     mail_user = request.form.get("mail_user", "").strip()
@@ -317,7 +336,7 @@ def action_items_page():
 
 @app.route("/actions/<int:action_id>/status", methods=["POST"])
 def action_item_status(action_id):
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         return redirect(url_for("action_items_page"))
     status = request.form.get("status", "").upper()
     db.set_action_status(action_id, status)
@@ -370,7 +389,7 @@ def email_detail(email_id):
     elif e.get("original_url") or e.get("gmail_link"):
         precise_link = e.get("original_url") or e.get("gmail_link") or ""
     is_demo = (e.get("provider") == "DEMO") or str(e.get("message_id") or "").startswith("demo-")
-    if is_demo and config.PUBLIC_DEMO:
+    if is_demo and _public_demo():
         precise_link = url_for("demo_original", email_id=email_id)
     return render_template(
         "email_detail.html", e=e, ctx=ctx, analysis=db.get_email_analysis(email_id),
@@ -390,7 +409,7 @@ def digest_generate():
         r for r in rows
         if r.get("priority") in ("P0_CRITICAL", "P1_HIGH") and r.get("status") == "已分类"
     ]
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         high = [
             row for row in rows
             if row.get("priority") in ("P0_CRITICAL", "P1_HIGH") and row.get("status") == "已分类"
@@ -405,7 +424,7 @@ def digest_generate():
 
 @app.route("/settings")
 def settings_page():
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         return redirect(url_for("dashboard"))
     return render_template(
         "settings.html", s=settings_store.get_all_masked(), providers=settings_store.PROVIDERS, saved=False
@@ -414,7 +433,7 @@ def settings_page():
 
 @app.route("/settings", methods=["POST"])
 def settings_save():
-    if config.PUBLIC_DEMO:
+    if _public_demo():
         return redirect(url_for("dashboard"))
     api_key = request.form.get("deepseek_api_key", "").strip()
     if api_key:
@@ -462,5 +481,5 @@ def settings_save():
 
 @app.route("/health")
 def health():
-    mode = "public-demo" if config.PUBLIC_DEMO else ("multi-user" if _hosted_mode() else "personal")
+    mode = "public-demo" if _public_demo() else ("multi-user" if _hosted_mode() else "personal")
     return jsonify({"status": "ok", "mode": mode})
