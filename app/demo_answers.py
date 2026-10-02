@@ -13,10 +13,10 @@ ANSWERS = {
         "pages excluding references. The rubric is reasoning 40%, evaluation design 30%, feasibility 20%, and "
         "presentation 10% [1]."
     ),
-    "what are the final deliverables for project nova and when are they due": (
-        "Project NOVA requires a public repository, a 5–8 minute video with presenter and screen visible, a report "
-        "of no more than 1,200 words, and transparent data and eval files [1]. Repository materials are due on "
-        "8 October at 12:00, before the final demo on 9 October [1]."
+    "what belongs in the project nova release package and when is it due": (
+        "The Project NOVA release package requires a tagged source archive, deployment manifest, runbook, "
+        "secret-free configuration template, synthetic sample data, model-quality results, and release notes [1]. "
+        "The package is due on 8 October at 12:00, before the stakeholder review on 9 October [1]."
     ),
     "which project nova evaluation gaps still need regression coverage": (
         "Three gaps still need regression coverage: irrelevant retrieval sources for identifier queries, duplicate "

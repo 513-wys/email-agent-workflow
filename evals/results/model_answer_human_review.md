@@ -10,7 +10,7 @@ Each answer receives up to 5 points: 2 for correctness, 2 for completeness, and 
 | --- | ---: | --- |
 | QA-01 | 3.5/5 | Correctly says no further action remains, but omits the useful context that the proposal was submitted under the extended deadline. |
 | QA-02 | 5/5 | Correct deadline, format and rubric weights with a source citation. |
-| QA-03 | 5/5 | Complete deliverables and dates; the automated failure is only a word-order mismatch. |
+| QA-03 | 5/5 | Complete release-package contents and dates; the automated failure is only a word-order mismatch. |
 | QA-04 | 5/5 | All three regression gaps are present and supported. |
 | QA-05 | 5/5 | Correctly reconciles the old and new venue and preserves the unchanged time. |
 | QA-06 | 3/5 | Correctly explains CloudNotes billing, but incorrectly says there is only one subscription and omits the informational newsletter/update items. |

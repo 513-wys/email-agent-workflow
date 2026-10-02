@@ -1,6 +1,6 @@
 {
   "run_type": "offline deterministic final evaluation with gold per-message labels",
-  "dataset_id": "email-agent-public-demo-v2",
+  "dataset_id": "email-agent-public-demo-v3",
   "metrics": {
     "dataset_cases": 20,
     "topic_assignment_accuracy": 1.0,
@@ -146,8 +146,8 @@
         "AX4102-04"
       ],
       "returned_sources": [
-        "AX4102-03",
-        "AX4102-04"
+        "AX4102-04",
+        "AX4102-03"
       ],
       "source_precision": 1.0,
       "source_recall": 1.0,

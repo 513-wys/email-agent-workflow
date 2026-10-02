@@ -2,7 +2,7 @@
 
 ## Product summary
 
-TraceInbox is a bilingual, privacy-aware email intelligence workspace. It can run on a personal computer or as an authenticated multi-user prototype. English is the course-delivery language; Chinese is an equivalent personal-use interface.
+TraceInbox is a bilingual, privacy-aware email intelligence workspace. It can run on a personal computer or as an authenticated multi-user prototype. English is the default interface; Chinese provides equivalent functionality.
 
 The product converts email into a traceable workflow: it imports messages, recovers original senders from forwarded mail, checks deterministic security signals, classifies and summarizes content, extracts action items, groups related messages into topics, produces a daily digest, and answers cross-email questions with source citations.
 

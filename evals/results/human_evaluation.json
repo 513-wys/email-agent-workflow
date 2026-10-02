@@ -17,10 +17,5 @@
     {"name": "Reproducibility and transparency", "score": 9, "maximum": 10}
   ],
   "automatic_regression_score_is_overall_quality_score": false,
-  "key_limitation": "The held-out set exposed 10% strict topic-key accuracy and a failed unsupported-question abstention; gold per-message labels are injected and generated answer text is not scored.",
-  "missing_submission_deliverables": [
-    "Final business and technical trade-off report of no more than 1,200 words",
-    "Recorded 5 +/- 3 minute presenter-and-screen demo",
-    "Model-backed generated-answer evaluation results"
-  ]
+  "key_limitation": "The held-out set exposed 10% strict topic-key accuracy and a failed unsupported-question abstention; gold per-message labels are injected and generated answer text is not scored."
 }

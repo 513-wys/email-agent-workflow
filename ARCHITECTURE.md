@@ -110,4 +110,4 @@ The Flask process is intentionally simple for course reproduction. Expensive imp
 
 ## Architectural trade-offs
 
-SQLite and a modular monolith maximize local ownership and reproducibility but are not the final architecture for a durable public service. Lexical retrieval is transparent and effective for exact course/project identifiers, but hybrid vector retrieval would improve paraphrase recall. IMAP app passwords reduced integration time, while OAuth would provide stronger onboarding and revocation. These trade-offs are evaluated in the final report rather than hidden.
+SQLite and a modular monolith maximize local ownership and reproducibility but are not the final architecture for a durable public service. Lexical retrieval is transparent and effective for exact course/project identifiers, but hybrid vector retrieval would improve paraphrase recall. IMAP app passwords reduced integration time, while OAuth would provide stronger onboarding and revocation. The evaluation evidence records the practical effects of these trade-offs.

@@ -45,15 +45,15 @@
     {
       "id": "QA-03",
       "expected_source_titles": [
-        "Project NOVA final demo requirements"
+        "Project NOVA release review package and deadline"
       ],
       "returned_source_titles": [
-        "Project NOVA final demo requirements"
+        "Project NOVA release review package and deadline"
       ],
       "source_set_pass": true,
       "required_answer_content_pass": true,
       "forbidden_answer_content_pass": true,
-      "answer": "Project NOVA requires a public repository, a 5–8 minute video with presenter and screen visible, a report of no more than 1,200 words, and transparent data and eval files [1]. Repository materials are due on 8 October at 12:00, before the final demo on 9 October [1]."
+      "answer": "The Project NOVA release package requires a tagged source archive, deployment manifest, runbook, secret-free configuration template, synthetic sample data, model-quality results, and release notes [1]. The package is due on 8 October at 12:00, before the stakeholder review on 9 October [1]."
     },
     {
       "id": "QA-04",

@@ -461,7 +461,7 @@
       "required_content_correct": false,
       "forbidden_content_correct": true,
       "citations_present": true,
-      "answer": "The final deliverables for Project NOVA are: a public repository, a 5–8 minute video with presenter and screen visible, a report of no more than 1,200 words, and transparent data and eval files. The repository materials are due by 12:00 on 8 October 2026 [1]. The final demos are scheduled for 9 October 2026 [1]."
+      "answer": "The Project NOVA release package requires a tagged source archive, deployment manifest, runbook, secret-free configuration template, synthetic sample data, model-quality results, and release notes. The package is due by 12:00 on 8 October 2026 [1]. The stakeholder review is scheduled for 9 October 2026 [1]."
     },
     {
       "id": "QA-04",

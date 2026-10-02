@@ -14,9 +14,9 @@
       "must_not_include": ["4 October is the current deadline"]
     },
     {
-      "id": "QA-03", "question": "What are the final deliverables for Project NOVA, and when are they due?",
+      "id": "QA-03", "question": "What belongs in the Project NOVA release package, and when is it due?",
       "expected_source_ids": ["NOVA-04"],
-      "must_include": ["public repository", "5–8 minute video", "1,200 words", "data and eval files", "8 October at 12:00"]
+      "must_include": ["tagged source archive", "deployment manifest", "runbook", "synthetic data", "model-quality results", "8 October at 12:00"]
     },
     {
       "id": "QA-04", "question": "Which Project NOVA evaluation gaps still need regression coverage?",

@@ -1,10 +1,10 @@
 # TraceInbox
 
-[Live course demo](https://email-agent-workflow.onrender.com/) · [Formatted Word report](deliverables/TraceInbox_Final_Project_Report.docx) · [Report text](FINAL_REPORT.md) · [Evaluation results](evals/results/metrics_summary.md) · [Architecture](ARCHITECTURE.md)
+[Live demo](https://email-agent-workflow.onrender.com/) · [Evaluation results](evals/results/metrics_summary.md) · [Architecture](ARCHITECTURE.md) · [Product definition](PRODUCT.md)
 
 TraceInbox is a bilingual, privacy-aware email intelligence workspace that turns a crowded inbox into a traceable working view. It imports email, checks security risk, classifies and summarizes messages, extracts action items, groups related messages into knowledge topics, creates a daily digest, and answers cross-email questions with links to the supporting messages.
 
-The repository contains a safe 20-email public demonstration, the local/full product implementation, synthetic data, executable evaluations, saved results, tests, deployment configuration, and the course report.
+The repository contains a safe 20-email public demonstration, the local/full product implementation, synthetic data, executable evaluations, saved results, tests, and deployment configuration.
 
 ## Reviewer quick path
 
@@ -12,10 +12,9 @@ For the fastest review:
 
 1. Open the [live demo](https://email-agent-workflow.onrender.com/). Its prefilled email and API fields are fictional and are never submitted to a mailbox or model.
 2. Try the dashboard, email details, actions, knowledge topics, cited questions, daily digest, language switch, and simulated “open original email” flow.
-3. Read the polished [≤1,200-word Word report](deliverables/TraceInbox_Final_Project_Report.docx) for the problem, business/technical trade-offs, critique, difficulties, tuning, results, and future path. A plain-text version remains in [FINAL_REPORT.md](FINAL_REPORT.md).
-4. Inspect the [20 transparent synthetic emails](fixtures/demo_email_cases.json) and their [data explainer](fixtures/README.md).
-5. Review the [evaluation explainer](evals/README.md), [metric summary](evals/results/metrics_summary.md), and saved [real-DeepSeek results](evals/results/model_evaluation.md).
-6. Run the Docker demo and automated tests using the commands below.
+3. Inspect the [20 transparent synthetic emails](fixtures/demo_email_cases.json) and their [data explainer](fixtures/README.md).
+4. Review the [evaluation explainer](evals/README.md), [metric summary](evals/results/metrics_summary.md), and saved [real-DeepSeek results](evals/results/model_evaluation.md).
+5. Run the Docker demo and automated tests using the commands below.
 
 ## Problem and product definition
 
@@ -43,7 +42,7 @@ The application does **not** send, delete, archive, or automatically reply to em
 - Stable local email/chunk indexing and related-message topic organization
 - Cross-email retrieval and answers with numbered, openable source citations
 - Gmail navigation when an exact thread ID is available
-- English-first course UI with a full Chinese language switch
+- English-first interface with a full Chinese language switch
 - Welcome/onboarding import flow with progress, dashboard, email detail, actions, knowledge, digest, and settings
 - Separate local, public-demo, and authenticated multi-user modes
 
@@ -173,7 +172,7 @@ PYTHONPATH=. python evals/run_model_evaluation.py
 
 | Mode | Mailbox and data | Model behavior | Intended use |
 | --- | --- | --- | --- |
-| Public course demo | 20 synthetic messages; mailbox access disabled | Checked-in reproducible answers; external model disabled | Safe assessment and product walkthrough |
+| Public demo | 20 synthetic messages; mailbox access disabled | Checked-in reproducible answers; external model disabled | Safe product walkthrough |
 | Personal local | User's local workspace; optional Gmail/NetEase IMAP | Personal DeepSeek key or local Ollama | Individual use and development |
 | Hosted multi-user | Authentication plus separate workspace database per account | Each user supplies their own encrypted credentials | Prototype only; needs durable managed storage before production |
 
@@ -195,7 +194,6 @@ Passwords are salted and hashed. Mailbox app passwords and DeepSeek keys are enc
 | `tests/` | Automated unit and integration regression tests |
 | `Dockerfile`, `compose.yaml`, `render.yaml` | Local container and Render deployment |
 | `PRODUCT.md`, `ARCHITECTURE.md`, `DESIGN.md` | Detailed product, technical, and visual-design decisions |
-| `deliverables/TraceInbox_Final_Project_Report.docx`, `FINAL_REPORT.md` | Formatted submission report and plain-text repository version |
 
 Every Python application module includes a module-level description so a human reviewer or coding agent can scan responsibilities without reading every line.
 
@@ -207,33 +205,6 @@ Every Python application module includes a module-level description so a human r
 - The curated demo is reproducible but small and English-only. The first holdout exposed overfitting, and there is no second untouched multilingual holdout.
 - The real-model run found incomplete answers, a security-alert contradiction, and slow QA latency. These failures are retained in the results rather than hidden.
 - Attachments, provider OAuth, native Outlook/Microsoft Graph, cost telemetry, user corrections, and a production security audit remain future work.
-
-The full business and technical critique is in the [formatted Word report](deliverables/TraceInbox_Final_Project_Report.docx) and [plain-text report](FINAL_REPORT.md).
-
-## Course-deliverable checklist
-
-| Requirement | Repository evidence | Status |
-| --- | --- | --- |
-| Problem statement | This README and [PRODUCT.md](PRODUCT.md) | Complete |
-| Business and technical trade-off analysis, ≤1,200 words | [TraceInbox Word report](deliverables/TraceInbox_Final_Project_Report.docx), approximately 1,133 words | Complete |
-| Working code in GitHub | Application, Docker setup, tests, and deployment configuration | Complete |
-| Transparent data plus explainer | `fixtures/*.json` and [fixtures/README.md](fixtures/README.md) | Complete |
-| Transparent evals plus explainer | `evals/*.json`, runners, [evals/README.md](evals/README.md), and saved results | Complete |
-| Run instructions | Safe demo, personal mode, tests, and evaluations above | Complete |
-| Legible module-level code documentation | Module docstrings and repository guide above | Complete |
-| Persona, input, output, architecture | Sections above plus [ARCHITECTURE.md](ARCHITECTURE.md) | Complete |
-| Metrics targeted and reached | [evals/results/metrics_summary.md](evals/results/metrics_summary.md) | Complete |
-| Recorded demo, face and screen visible, 5 ± 3 minutes | Recording completed; submission link is supplied with the course hand-in | Complete |
-
-## Current completion sequence
-
-1. Safe Render demonstration — complete
-2. Twenty representative synthetic emails — complete
-3. Knowledge, QA, actions, and digest validation — complete
-4. Evals and actual metrics — complete
-5. README, product documentation, and architecture entry point — complete in this revision
-6. English report — complete early
-7. Concise 5 ± 3 minute recorded demonstration — complete
 
 ## License
 

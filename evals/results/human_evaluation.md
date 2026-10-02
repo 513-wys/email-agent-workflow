@@ -32,7 +32,7 @@ The system demonstrates a coherent, privacy-safe email workflow and a reproducib
 | --- | --- | --- | --- |
 | QA-01 AX4102 remaining work | Correct fixed-set sources | Must reconcile submission confirmation with deadline update | Good evidence selection; generated synthesis still needs manual wording review. |
 | QA-02 AX4102 deadline/rubric | Correct fixed-set source | Must reject superseded 4 October deadline | Strong deterministic retrieval. |
-| QA-03 NOVA deliverables | Correct fixed-set source | Multiple deliverables and one deadline | Strong evidence selection. |
+| QA-03 NOVA release package | Correct fixed-set source | Multiple package components and one deadline | Strong evidence selection. |
 | QA-04 NOVA eval gaps | Correct fixed-set source | Enumerated regression gaps | Strong evidence selection. |
 | QA-05 roundtable change | Correct fixed-set sources | Must combine old and new venue facts | Good temporal case, but rule is lexically narrow. |
 | QA-06 subscriptions | Correct fixed-set sources | Must separate informational updates from failed payment | Useful representative case; current retrieval filtering is category-dependent. |
@@ -61,22 +61,6 @@ For the report, the defensible claim is: **“The tuned deterministic layer achi
 4. Add Chinese questions and ambiguous/hostile inputs.
 5. Record latency, failure rate, and approximate model cost for a complete import and QA run.
 6. Document a short usability walkthrough of the deployed 20-message demo.
-
-## Submission-artifact check
-
-| Teacher requirement | Current evidence | Status |
-| --- | --- | --- |
-| Problem statement | `README.md`, `PRODUCT.md` | Present |
-| Business and technical trade-off analysis within report limit | Not yet assembled as the final ≤1,200-word report | **Missing final deliverable** |
-| Working GitHub code | Repository plus run/deploy instructions | Present |
-| Recorded 5 ± 3 minute demo with presenter and screen | No checked-in video evidence | **Missing final deliverable** |
-| Transparent data and explainer | `fixtures/demo_email_cases.json`, `fixtures/README.md` | Present |
-| Transparent evals and explainer | `evals/demo_qa_cases.json`, `evals/README.md`, this rubric and result | Present |
-| Legible module-level code documentation | Module docstrings, README module map, architecture documentation | Mostly present |
-| Persona, input, output, architecture | `PRODUCT.md`, `README.md`, `ARCHITECTURE.md` | Present |
-| Targeted metrics and reached metrics | Baseline/final comparison, frozen holdout, human score, and subsequent model-backed run | Present; see `metrics_summary.md` |
-
-This checklist should be updated again immediately before submission.
 
 ## Post-review engineering note
 

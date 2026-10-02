@@ -22,7 +22,7 @@ def _terms(text, expand=False):
         "remains": {"action", "submit", "submitted", "received", "deadline", "further"},
         "still": {"remains", "nothing", "needed", "received", "deadline", "further"},
         "changed": {"change", "moved", "extended", "updated", "venue", "from", "to"},
-        "deliverables": {"requirements", "submit", "repository", "video", "report", "files"},
+        "package": {"requirements", "deliver", "release", "manifest", "runbook", "files"},
         "deadline": {"due", "close", "closes", "submit"},
         "deadlines": {"due", "close", "closes", "registration", "applications"},
     }

@@ -29,11 +29,12 @@ class PublicDemoTests(unittest.TestCase):
         self.assertEqual(1, sum(not row["is_safe"] for row in rows))
         self.assertGreaterEqual(len(db.list_topics()), 8)
 
-    def test_recording_helpers_are_not_shipped_as_product_routes(self):
+    def test_public_demo_entry_is_available(self):
         app.config.update(TESTING=True, SECRET_KEY="test-secret")
         client = app.test_client()
-        self.assertEqual(404, client.get("/presentation").status_code)
-        self.assertEqual(404, client.get("/presenter").status_code)
+        response = client.get("/demo")
+        self.assertEqual(200, response.status_code)
+        self.assertIn(b"TraceInbox", response.data)
 
     def test_old_synthetic_seed_is_safely_replaced(self):
         db.insert_email({

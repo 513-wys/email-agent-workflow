@@ -1,6 +1,6 @@
 # Three-Day Execution Baseline — Historical Planning Record
 
-This document records the compressed implementation baseline used to move TraceInbox from an early Flask email viewer to the final course-delivery prototype. It is retained for process transparency. It is not the current status report; use the repository `README.md`, saved evaluation results, and current tests for final evidence.
+This document records the compressed implementation baseline used to move TraceInbox from an early Flask email viewer to the current product prototype. It is retained for process transparency. It is not the current status report; use the repository `README.md`, saved evaluation results, and current tests for final evidence.
 
 ## Starting point
 
@@ -8,7 +8,7 @@ At the start of the three-day plan, the repository already had a Chinese Flask i
 
 ## Product definition
 
-The planned product was a local-first, read-only email agent for students and knowledge workers. It would turn incoming mail into a safe, traceable working view while preserving the source mailbox as the authority. The product would support English course delivery and an equivalent Chinese interface.
+The planned product was a local-first, read-only email agent for students and knowledge workers. It would turn incoming mail into a safe, traceable working view while preserving the source mailbox as the authority. The product would provide equivalent English and Chinese interfaces.
 
 Key outputs were prioritized email, security decisions, bilingual summaries, actions and deadlines, related-message topics, cited cross-email answers, a daily digest, and a route back to the original evidence.
 
@@ -72,7 +72,7 @@ Deterministic code owns protocol behavior, identity, dates, deduplication, state
 2. Create the public synthetic demo and deployment boundary.
 3. Validate dashboard, details, actions, topics, QA, digest, and original-message simulation.
 4. Check in transparent fixtures, holdout cases, evaluation runners, saved metrics, and failure analysis.
-5. Complete README, architecture, privacy documentation, report, and demo script.
+5. Complete README, architecture, privacy documentation, and reproducible demo guidance.
 
 ## Final demonstration acceptance criteria
 

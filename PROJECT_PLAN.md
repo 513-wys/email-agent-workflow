@@ -22,7 +22,7 @@ It does not send, delete, archive, or automatically reply to email. Native Outlo
 | Persistence and orchestration | H-01–H-06 | Schema migration, auditability, isolation, background progress | Implemented for local/prototype scale |
 | User interface | I-01–I-10 | Welcome/onboarding, dashboard, details, actions, knowledge, digest | Complete in English and Chinese |
 | Testing and evaluation | J-01–J-08 | Synthetic data, holdout, model eval, performance and human rubric | Complete with saved evidence |
-| Privacy and release | K-01–K-10 | Secret exclusion, CSRF/auth, tenant isolation, safe demo | Complete for course delivery; production gaps documented |
+| Privacy and release | K-01–K-10 | Secret exclusion, CSRF/auth, tenant isolation, safe demo | Complete for the prototype; production gaps documented |
 
 ## Key milestones
 
@@ -54,4 +54,4 @@ It does not send, delete, archive, or automatically reply to email. Native Outlo
 - Hybrid lexical/vector retrieval and a larger untouched multilingual evaluation set
 - Cost and latency telemetry, correction feedback, and calibrated confidence
 
-These items are explicitly future work and are not claimed as completed course-delivery functionality.
+These items are explicitly future work and are not claimed as completed functionality.
