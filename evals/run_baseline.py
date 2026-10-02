@@ -76,7 +76,7 @@ def record_for(case, index):
         "risk_level": "CRITICAL" if not safe else "LOW", "is_safe": int(safe),
         "intent": expected["intent"], "category": category_code(expected["category"]),
         "priority": expected["priority"], "sentiment": "NEUTRAL", "language": "en-US",
-        "summary": case["body"], "summary_zh": "", "context_json": "{}",
+        "summary": case.get("summary", case["body"]), "summary_zh": "", "context_json": "{}",
         "status": "已隔离" if not safe else "已分类", "created_at": case["received_at"],
         "account_id": case["account"], "provider": provider, "source_uid": str(index),
         "internet_message_id": "", "provider_message_id": case["id"],

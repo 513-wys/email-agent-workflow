@@ -44,7 +44,7 @@ def _analysis(case):
         "deadline_at": expected.get("deadline"), "deadline_text": None,
         "labels": [expected["topic"]] if expected.get("topic") else [],
         "entities": _entities(case), "reason_codes": ["SYNTHETIC_DEMO_FIXTURE"],
-        "model_provider": "fixture", "model_name": "", "prompt_version": "public-demo-v2",
+        "model_provider": "fixture", "model_name": "", "prompt_version": "public-demo-v3",
         "action_items": action_items,
     }
 
@@ -59,13 +59,13 @@ def _record(case, index):
         "risk_level": "CRITICAL" if not safe else "LOW", "is_safe": int(safe),
         "intent": expected["intent"], "category": CATEGORY_CODES[expected["category"]],
         "priority": expected["priority"], "sentiment": "NEUTRAL", "language": "en-US",
-        "summary": case["body"], "summary_zh": "",
+        "summary": case.get("summary", case["body"]), "summary_zh": "",
         "context_json": json.dumps({"synthetic": True, "case_id": case["id"]}),
         "status": "已分类" if safe else "已隔离", "created_at": case["received_at"],
         "account_id": case["account"], "provider": "DEMO", "source_uid": str(index),
         "internet_message_id": "", "provider_message_id": case["id"],
         "received_at": case["received_at"], "original_url": "", "content_hash": case["id"],
-        "uidvalidity": "public-demo-v2", "provider_thread_id": case["id"],
+        "uidvalidity": "public-demo-v3", "provider_thread_id": case["id"],
         "forwarded_by": "demo.student@example.com" if case["source"] == "university_forwarded" else "",
     }
 

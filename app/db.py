@@ -66,7 +66,7 @@ def init_db():
     conn.close()
 
 
-def public_demo_dataset_is_current(expected_count=20, version="public-demo-v2"):
+def public_demo_dataset_is_current(expected_count=20, version="public-demo-v3"):
     """Return whether the isolated demo database already contains the current fixture."""
     conn = _conn()
     row = conn.execute(

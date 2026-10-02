@@ -12,7 +12,7 @@ def _terms(text, expand=False):
         "the", "and", "for", "from", "with", "what", "which", "does", "mailbox",
         "email", "emails", "about", "into", "have", "has", "had", "are", "was",
         "were", "that", "this", "your", "you", "say", "current", "please",
-        "in", "is", "did", "do", "one", "needs",
+        "in", "is", "did", "do", "one", "need", "needs", "still",
     }
     words.difference_update(stopwords)
     expansions = {
