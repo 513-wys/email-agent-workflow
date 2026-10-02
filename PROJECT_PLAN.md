@@ -1,444 +1,57 @@
-# AI 邮件助手：任务分解、Agent 架构与完成度基线
+# TraceInbox Implementation Plan and Status Map
 
-> 文档目的：假设项目尚未开始，从零拆解完整工作；随后以相同任务坐标核验当前代码完成度。
->
-> 当前产品范围：独立本地应用，不依赖 n8n；v1 只读，不自动回复；支持 Gmail、网易 163，以及 Outlook 转发至 Gmail；晨报只在网页生成。
+This file preserves the project's implementation coordinates in a concise English form. It is a planning/status artifact, not the primary reviewer entry point. For the final product state, start with [`README.md`](README.md), the saved results in [`evals/results/`](evals/results/), and the current code.
 
-## 1. 产品目标与边界
+## Product boundary
 
-### 1.1 产品目标
+TraceInbox is a read-only email intelligence workspace. It imports Gmail or NetEase mail, handles forwarded institutional/Outlook messages, performs security screening and semantic triage, extracts actions, organizes cross-email topics, creates a digest, and answers questions with citations. It supports English and Chinese interfaces, a local DeepSeek/Ollama path, an authenticated hosted prototype, and a safe synthetic public demo.
 
-构建一个全中文、可在个人电脑运行的 AI 邮件助手，能够：
+It does not send, delete, archive, or automatically reply to email. Native Outlook OAuth, attachment understanding, and production-grade cloud storage are outside v1.
 
-1. 连接个人邮箱并可靠拉取当天新邮件。
-2. 在不破坏邮箱原始状态的前提下解析、去重并记录邮件。
-3. 先进行钓鱼、伪造、恶意链接和账号风险检查。
-4. 根据正文真实语义进行细粒度分类，而不是只看发件地址。
-5. 对外语邮件生成准确的中文摘要。
-6. 将联系人、企业背景和知识库信息与邮件关联。
-7. 在本地界面显示邮件、分类、安全结论和待办。
-8. 从助手一键跳回 Gmail 原始邮件，查看 HTML、附件和链接。
-9. 按当天邮件生成中文晨报。
-10. 允许用户纠正分类，并把纠正结果用于后续质量改进。
+## Work coordinates
 
-### 1.2 v1 明确包含
-
-- 独立 Python Web 应用
-- DeepSeek 个人 API Key
-- Ollama / Qwen3 8B 本地备用模型
-- Gmail IMAP
-- 网易 163 IMAP
-- Outlook 邮件转发至 Gmail 后统一处理
-- 当天邮件同步
-- 安全检测
-- 细粒度分类与中文摘要
-- 本地 SQLite 审计记录
-- Gmail 原文跳转
-- 手动生成晨报
-- 全中文管理界面
-
-### 1.3 v1 明确不包含
-
-- 自动发信
-- AI 回复草稿
-- Telegram/Slack 审批
-- 晨报 Telegram 推送
-- Outlook OAuth 原生接入
-- Qwen 27B MTP
-- n8n 作为运行平台
-
-这些项目可作为 v2 候选，但不计入当前 v1 验收失败。
-
-## 2. 从零设计时应采用的系统结构
-
-```text
-邮箱账号配置
-    ↓
-连接器层（Gmail / 163 / Demo）
-    ↓
-摄取协调器 Ingestion Orchestrator
-    ├── 时间窗口筛选
-    ├── UID / Message-ID 去重
-    ├── MIME / 转发链解析
-    └── 原文跳转定位
-    ↓
-安全 Agent
-    ├── SPF / DKIM / DMARC 特征
-    ├── URL / 域名特征
-    ├── 附件元数据
-    └── LLM 威胁判断
-    ↓ 安全通过
-分类 Agent
-    ├── 规则优先分类
-    ├── LLM 语义分类
-    ├── 置信度与理由
-    └── 中文摘要
-    ↓
-上下文 Agent
-    ├── 联系人 / CRM
-    ├── 企业网站
-    └── 本地知识库 RAG
-    ↓
-审计与存储层
-    ↓
-中文 Web UI
-    ├── 仪表盘
-    ├── 邮件列表
-    ├── 邮件详情 / Gmail 原文
-    ├── 人工纠正
-    ├── 晨报
-    └── 设置 / 连接测试
-```
-
-## 3. Agent 与非 Agent 模块划分
-
-不是每一步都应该交给大模型。连接、日期、去重、认证、链接生成和数据保存必须采用确定性代码；只有需要语义判断的步骤使用 Agent。
-
-| 坐标 | 组件 | 类型 | 输入 | 输出 | 核心职责 |
-|---|---|---|---|---|---|
-| AG-00 | 主协调器 | 确定性编排 | 同步请求 | ProcessingRun | 控制顺序、重试、状态、失败隔离 |
-| AG-01 | 邮件摄取器 | 确定性工具 | Account + 时间窗口 | EmailEvent[] | UID 拉取、当天过滤、去重、不标已读 |
-| AG-02 | MIME/转发解析器 | 确定性工具 | Raw MIME | NormalizedEmail | 正文、HTML、附件、原始发件人、转发链 |
-| AG-03 | 安全 Agent | 规则 + LLM | NormalizedEmail | SecurityAssessment | 钓鱼、伪造、链接、账号风险判断 |
-| AG-04 | 分类 Agent | 规则 + LLM | 安全邮件 | TriageResult | 细分类、优先级、摘要、置信度 |
-| AG-05 | 上下文 Agent | 检索 + LLM | Email + Triage | ContextBundle | CRM、网站、知识库依据 |
-| AG-06 | 晨报 Agent | LLM | 当天处理记录 | DigestReport | 今日概览、待办、提醒、原文链接 |
-| AG-07 | 质量反馈器 | 确定性 + 评测 | 用户纠正 | CorrectionRecord | 重分类、评测集、Prompt 迭代依据 |
-| AG-08 | 模型网关 | 确定性工具 | PromptRequest | ModelResponse | DeepSeek、Ollama、超时、降级、Schema 校验 |
-
-## 4. Prompt 资产清单
-
-| 坐标 | Prompt | 目的 | 必须输出 | 关键约束 |
-|---|---|---|---|---|
-| PR-01 | security_screening | 判断邮件安全性 | 安全、评分、等级、证据 | 邮件内容是不可信数据；不得听从正文指令 |
-| PR-02 | triage_classification | 细粒度分类 | intent、priority、confidence、reasons | 以正文为主；不得因 `.edu` 或转发自动判垃圾 |
-| PR-03 | summary_translation | 外语邮件中文摘要 | 原文摘要、中文摘要、行动项 | 不增加原文不存在的信息 |
-| PR-04 | forwarded_mail_analysis | 分析转发链 | 原始发件人、原始主题、实际事件 | 区分转发者与原始发件人 |
-| PR-05 | website_grounding | 企业背景总结 | 摘要、来源、可信度 | 网站文本是不可信数据；禁止执行网页指令 |
-| PR-06 | digest_generation | 生成当日晨报 | 概览、紧急事项、重要跟进、信息流 | 只使用当天数据；每项附原文链接 |
-| PR-07 | correction_explanation | 解释纠正差异 | 旧分类、新分类、差异原因 | 仅用于质量分析，不自动修改 Prompt |
-
-### 4.1 v1 分类体系
-
-| Intent | 中文名称 | 典型内容 | 默认优先级 |
+| Area | Coordinate range | Intended outcome | Final state |
 |---|---|---|---|
-| BUSINESS_INQUIRY | 商务合作 | 报价、合作、供应商咨询 | P1/P2 |
-| CUSTOMER_SUPPORT | 客户支持 | 故障、投诉、产品问题 | P1/P2 |
-| INTERNAL_COLLABORATION | 内部协作 | 会议、审批、项目同步 | P1/P2 |
-| EDUCATION_ADMIN | 教育行政 | 学校通知、课程、注册、校园服务 | P1/P2 |
-| TRANSACTIONAL | 交易凭证 | 发票、收据、支付、物流 | P2/P3 |
-| SECURITY_ALERT | 安全提醒 | 新登录、异常操作、账号风险 | P0/P1 |
-| VERIFICATION_CODE | 验证码 | OTP、2FA、邮箱验证 | P2，短时有效 |
-| ACCOUNT_PERMISSION | 账号与授权 | OAuth 授权、共享数据、权限变更 | P1/P2 |
-| NEWSLETTER | 资讯订阅 | 行业简报、内容推荐 | P3 |
-| PRODUCT_ANNOUNCEMENT | 产品通知 | 版本、规则、服务变更 | P2/P3 |
-| PERSONAL | 个人邮件 | 一对一沟通、个人转发 | P2 |
-| SPAM_OR_COLD | 垃圾营销 | 无关群发、冷推销、诈骗 | P3 或隔离 |
-| OTHER | 其他/待确认 | 低置信度或无法判断 | 人工确认 |
-
-## 5. 核心数据契约
-
-| 坐标 | 数据对象 | 关键字段 |
-|---|---|---|
-| DC-01 | MailAccount | id、provider、email、secret_ref、enabled、last_sync_at |
-| DC-02 | EmailEvent | source、account_id、uid、message_id、gmail_msgid、thread_id、internal_date |
-| DC-03 | NormalizedEmail | from、original_from、to、subject、body_text、body_html、attachments、forward_chain |
-| DC-04 | SecurityAssessment | score、level、is_safe、signals、reasons、model |
-| DC-05 | TriageResult | intent、category_zh、priority、confidence、reasons、summary_zh、action_items |
-| DC-06 | ContextBundle | contact、company、kb_references、source_urls |
-| DC-07 | ProcessingRun | status、started_at、finished_at、duration、counts、errors |
-| DC-08 | CorrectionRecord | email_id、old_result、new_result、reason、corrected_at |
-| DC-09 | DigestReport | date、totals、distribution、todos、items、generated_at |
-
-## 6. 主任务坐标表：从零开始的完整开发拆解
-
-状态定义：
-
-- ✅ 完成：当前代码已实现并验证基本路径。
-- 🟡 部分完成：已有代码，但未满足验收或尚未端到端验证。
-- ❌ 未完成：当前没有可用实现。
-- ⏸ 明确延期：用户已决定不纳入 v1。
-- 🗃 历史实现：旧 n8n 资产存在，但不属于当前运行产品。
-
-### A. 产品定义与架构
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| A-01 | 固化 v1 产品范围 | 无 | 范围、边界、用户、隐私策略形成文档 | ✅ | `PRODUCT.md` 已固化范围、约束、原则与开放决策 |
-| A-02 | 确定独立应用架构 | A-01 | 不依赖 n8n；模块边界清晰 | ✅ | Flask + SQLite 独立应用已建立 |
-| A-03 | 定义 Agent 与确定性工具边界 | A-02 | 日期、去重、连接不依赖 LLM | ✅ | `ARCHITECTURE.md` 已逐项指定执行者、约束和降级路径 |
-| A-04 | 定义数据契约 | A-02 | DC-01 至 DC-09 有 Schema 与迁移规范 | ✅ | 9 个对象已有 v1 JSON Schema；迁移规则和现有字段映射已定义，运行时迁移归 H-06 |
-| A-05 | 建立威胁模型与隐私模型 | A-01 | 明确本地、DeepSeek、网站抓取的数据流 | ✅ | `SECURITY_PRIVACY.md` 已定义隐私模式、威胁、控制、残余风险和发布门槛 |
-
-### B. 模型与 Prompt
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| B-01 | DeepSeek 模型客户端 | A-03 | 个人 Key 可配置并调用 | ✅ | `llm.py` 已实现 |
-| B-02 | Ollama 本地模型客户端 | A-03 | Qwen3 8B 可调用 | ✅ | 当前支持 Ollama |
-| B-03 | 云端失败自动降级 | B-01,B-02 | 429/5xx/超时自动切 Ollama | ❌ | 仅 Key 为空时才走 Ollama |
-| B-04 | JSON Schema 输出校验 | A-04 | 非法字段拒绝或修复，不静默错分 | ❌ | 只做宽松 JSON 解析 |
-| B-05 | 安全 Prompt | A-05 | PR-01 完整，抗 Prompt Injection | 🟡 | 基本威胁 Prompt 已有，缺不可信数据隔离 |
-| B-06 | 细分类 Prompt | 分类体系 | PR-02 覆盖全部分类并给置信度/理由 | 🟡 | 已扩到 8 类，仍缺教育、验证码拆分、置信度 |
-| B-07 | 翻译摘要 Prompt | B-04 | 非中文邮件准确中文摘要 | 🟡 | 分类 Prompt 内附带摘要，没有独立质量控制 |
-| B-08 | 转发邮件 Prompt | MIME 转发解析 | 能识别原始事件和原始发件人 | ❌ | 当前仅把正文整体交给分类模型 |
-| B-09 | 网站 Grounding Prompt | 上下文工具 | 有来源、抗注入、不编造 | 🟡 | 已有简单总结 Prompt |
-| B-10 | 晨报 Prompt | 当天查询 | PR-06 输出稳定结构和原文链接 | 🟡 | 已有基本 Prompt，但输入不是当天且无链接 |
-| B-11 | Prompt 评测集 | B-05~B-10 | 典型样例自动回归，分类指标可见 | ❌ | 无当前独立应用测试集 |
-
-### C. 邮箱账号与连接器
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| C-01 | Gmail 应用密码配置 | A-05 | 设置页可保存并测试连接 | 🟡 | 可保存并登录；无测试按钮和友好错误 |
-| C-02 | 163 授权码配置 | A-05 | 可保存、测试和拉取 | 🟡 | 有 IMAP preset，未真实端到端验证 |
-| C-03 | Outlook 转发方案 | C-01 | 文档说明可执行，转发邮件可识别 | 🟡 | 设置页有说明；转发链解析不足 |
-| C-04 | 多邮箱账号模型 | DC-01 | Gmail 与 163 可同时启用 | ❌ | 当前设置只能保存一个账号 |
-| C-05 | 凭证安全存储 | A-05 | Keychain/加密；敏感文件 600 | ❌ | 当前 SQLite 明文且文件权限 644 |
-| C-06 | 连接测试与状态 | C-01,C-02 | 显示成功、失败原因、上次同步 | ❌ | 无测试接口和连接状态 |
-
-### D. 摄取、解析、时间与去重
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| D-01 | IMAP UID 拉取 | C-01/C-02 | 不依赖易变 sequence number | ❌ | 当前使用 sequence number |
-| D-02 | 当天时间窗口 | D-01 | 按 Asia/Singapore 的当天边界查询 | 🟡 | 使用 `UNSEEN SINCE`，时区语义不完整 |
-| D-03 | 实际收件时间 | D-01 | 保存 `INTERNALDATE`，统一 ISO+08:00 | ❌ | 当前保存发件人 `Date` 头 |
-| D-04 | 不改变已读状态 | D-01 | 使用 BODY.PEEK，拉取后邮件仍未读 | ❌ | 当前 `RFC822` 可能标记已读 |
-| D-05 | 稳定去重 | D-01,DC-02 | account+UID/Message-ID 唯一 | ❌ | trace_id 基于 sequence number |
-| D-06 | MIME 正文解析 | D-01 | 正确处理 text/plain、HTML、编码 | 🟡 | 有基本解析，HTML 仅作为字符串 |
-| D-07 | 转发链解析 | D-06 | 获取 original_from/subject/date/body | ❌ | 未实现结构化转发解析 |
-| D-08 | 附件元数据 | D-06 | 保存名称、类型、大小，不盲目下载 | ❌ | 未实现 |
-| D-09 | Gmail 原文定位 | D-01 | 正确十六进制 ID/线程链接 | 🟡 | 已提取 X-GM-MSGID，但 URL 算法错误 |
-| D-10 | 历史链接回填 | D-09 | 现有记录可跳转或用搜索回退 | ❌ | 当前 24/24 无链接 |
-| D-11 | 连接关闭与错误恢复 | D-01 | finally logout、可重试、错误可见 | ❌ | 多处异常被吞掉 |
-
-### E. 安全 Agent
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| E-01 | URL 提取与域名规范化 | D-06 | 覆盖纯文本与 HTML href | 🟡 | 只扫描当前正文文本/未保存 HTML |
-| E-02 | SPF/DKIM/DMARC 特征 | D-06 | 区分原始邮件与转发外层认证 | 🟡 | 读取 Header 字符串，未验证转发链 |
-| E-03 | 威胁评分 | B-05 | score 与 level 一致且有证据 | 🟡 | 有评分；出现 40 分却 LOW 的不一致 |
-| E-04 | 可信域名策略 | E-01 | 用户可维护，不因普通链接固定加高分 | ❌ | 写死白名单，未知链接至少 40 分 |
-| E-05 | Prompt Injection 防护 | B-05 | 邮件正文不能改变安全 Agent 指令 | ❌ | 未实现 |
-| E-06 | 附件安全 | D-08 | 危险附件可识别、记录、阻断 | ❌ | 未实现 |
-| E-07 | 邮箱侧隔离/标签 | E-03 | Gmail/163 有真实隔离或明确只读标记 | ❌ | 当前仅数据库状态“已隔离” |
-| E-08 | 安全评测集 | E-01~E-07 | 钓鱼与合法通知误报率可测 | ❌ | 只有演示钓鱼样例 |
-
-### F. 分类、摘要与人工纠正
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| F-01 | 基础语义分类 | B-06 | 邮件可分类并存储 | ✅ | 当前可调用模型分类 |
-| F-02 | 细粒度分类体系 | B-06 | 覆盖安全、验证码、教育、权限、产品通知 | 🟡 | 当前 8 类，尚未达到目标 13 类 |
-| F-03 | 正文优先判断 | D-07 | `.edu`/转发地址不直接决定分类 | 🟡 | Prompt 有规则，缺结构化输入和评测 |
-| F-04 | 规则 + LLM 混合 | F-02 | 验证码/安全提醒先规则识别 | ❌ | 当前完全依赖 LLM |
-| F-05 | 置信度与待确认 | B-04 | 低置信度进入待确认，不默认资讯 | ❌ | 默认回退 `NEWSLETTER_OR_INFO` |
-| F-06 | 中文摘要 | B-07 | 外语邮件摘要准确、无编造 | ✅ | 已生成并存储 summary_zh |
-| F-07 | 行动项与是否需回复 | B-04 | UI 显示 action_items/requires_reply | ❌ | 模型字段未完整存储和展示 |
-| F-08 | 人工纠正 UI | AG-07 | 用户可修改分类、优先级和理由 | ❌ | 未实现 |
-| F-09 | 重新分类 | F-08 | Prompt 更新后可批量重跑 | ❌ | 旧 24 封仍保留错误分类 |
-| F-10 | 分类质量报表 | B-11,F-08 | 准确率、混淆矩阵、误差样例 | ❌ | 未实现 |
-
-### G. 上下文、CRM 与 RAG
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| G-01 | 标准邮箱地址解析 | D-06 | `Name <x@y.com>` 正确提取地址 | ❌ | 当前直接用完整 From 字符串 |
-| G-02 | 本地联系人/CRM | G-01 | 可查联系人且可维护 | 🟡 | SQLite 有两条演示联系人，无管理 UI |
-| G-03 | 条件化官网抓取 | F-01 | 只对必要的新商务联系人抓取 | ❌ | 当前所有安全邮件都尝试抓取 |
-| G-04 | SSRF 与下载保护 | G-03 | 禁止私网、限制大小/类型/跳转 | ❌ | 未实现 |
-| G-05 | 网站摘要 | B-09,G-03 | 有来源和可信度 | 🟡 | 有简单摘要，无来源记录 |
-| G-06 | 本地知识库 | A-04 | 文档可导入、切分、索引 | ❌ | 未实现 |
-| G-07 | RAG 检索 | G-06 | 返回引用片段和来源 | ❌ | `kb_references` 永远为空 |
-
-### H. 数据库与审计
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| H-01 | 基础邮件表 | DC-02~DC-06 | 邮件、分类、安全、摘要可存储 | ✅ | SQLite 已实现 |
-| H-02 | 正确 Upsert | D-05 | 更新不删除旧行、不改变 ID | ❌ | 当前使用 INSERT OR REPLACE |
-| H-03 | 处理运行表 | DC-07 | 每次同步有数量、耗时、错误 | ❌ | 未实现 |
-| H-04 | 纠正历史表 | DC-08 | 保存人工纠正前后结果 | ❌ | 未实现 |
-| H-05 | 晨报历史表 | DC-09 | 可查看历史晨报 | ❌ | 未实现 |
-| H-06 | 数据库迁移 | A-04 | 版本化迁移、可回滚 | ❌ | 只有 try/except ALTER |
-| H-07 | 索引与分页 | H-01 | 日期、账号、状态、intent 有索引 | ❌ | 未实现 |
-| H-08 | 备份与保留策略 | A-05 | 可导出/备份/清理 | ❌ | 未实现 |
-
-### I. 晨报 Agent
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| I-01 | 当天查询 | D-03,H-01 | 只读取当天或过去 24 小时 | ❌ | 当前读取最近 100 条全部记录 |
-| I-02 | 分类统计 | I-01 | 总量、占比、高优数量准确 | ❌ | Prompt 仅收到邮件列表 |
-| I-03 | 待办与链接 | I-01,D-09 | 每项可跳原文 | ❌ | 无有效 Gmail 链接 |
-| I-04 | 中文晨报生成 | B-10 | 手动生成中文晨报 | ✅ | Web POST 已实现 |
-| I-05 | 晨报持久化 | H-05 | 可查看历史日期 | ❌ | 未保存 |
-| I-06 | Telegram 推送 | 无 | 不属于 v1 | ⏸ | 用户明确取消 |
-
-### J. Web UI 与体验
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| J-01 | 全中文应用骨架 | A-01 | 导航和页面中文 | ✅ | 基础页面已实现 |
-| J-02 | 仪表盘 | H-01 | 今日数据、上次同步、当前账号 | 🟡 | 有累计统计；缺今日与同步状态 |
-| J-03 | 邮件列表 | H-01 | 搜索、筛选、排序、分页、响应式 | 🟡 | 有状态/分类筛选；其余缺失 |
-| J-04 | 邮件详情 | H-01 | 安全、分类、摘要、上下文、原文入口 | 🟡 | 基本信息已展示；Gmail 入口不可用 |
-| J-05 | 人工纠正 | F-08 | 可修改并保存纠正 | ❌ | 未实现 |
-| J-06 | Gmail 原文按钮 | D-09 | 真实邮件点击可打开正确原文 | ❌ | 当前 24/24 无按钮 |
-| J-07 | 设置页 | C-01,C-02 | 配置、清除、测试、状态 | 🟡 | 可保存；不能清除或测试 |
-| J-08 | 收信进度 | AG-00 | loading、进度、成功/失败摘要 | ❌ | 同步请求，用户感知为卡住 |
-| J-09 | 中文错误页面 | AG-00 | 认证/API/解析错误可理解 | ❌ | 目前会出现 Python traceback |
-| J-10 | 响应式布局 | J-01~J-07 | 390px 手机可完成全部任务 | ❌ | 导航断行，表格溢出 |
-| J-11 | 无障碍 | J-01~J-07 | 键盘、焦点、label、触控 44px | 🟡 | 语义基础存在，仍有明显缺口 |
-| J-12 | 中文枚举映射 | F-02 | Intent/priority/risk/language 全中文 | ❌ | 筛选和详情仍显示英文代码 |
-| J-13 | 晨报页面 | I-04 | 生成、loading、错误、Markdown 渲染 | 🟡 | 能生成；无 loading，Markdown 未渲染 |
-
-### K. 安全、任务执行与运维
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| K-01 | 后台任务执行 | AG-00 | 收信不阻塞 HTTP，请求可查询状态 | ❌ | 所有 AI/网络调用串行同步 |
-| K-02 | 超时、重试与限流 | AG-08 | 可控重试，不重复处理 | ❌ | 只有 requests timeout |
-| K-03 | DeepSeek/Ollama 健康检查 | B-01,B-02 | 设置页可测试 | ❌ | 未实现 |
-| K-04 | 关闭 Flask debug | 无 | 无交互调试器 | ❌ | `debug=True` |
-| K-05 | 正式 WSGI 服务 | K-04 | 可稳定后台运行 | ❌ | 当前使用开发服务器 |
-| K-06 | CSRF 与本地访问保护 | A-05 | 设置和邮件数据不可被跨站修改/读取 | ❌ | 未实现 |
-| K-07 | 结构化日志 | AG-00 | 日志含 run_id，不含密钥/正文 | ❌ | 未实现 |
-| K-08 | Docker/macOS 服务 | K-05 | 重启后可恢复运行 | ❌ | 独立应用无 Docker/LaunchAgent |
-
-### L. 测试、验收与文档
-
-| ID | 任务 | 依赖 | 验收标准 | 当前状态 | 当前证据 / 缺口 |
-|---|---|---|---|---|---|
-| L-01 | 单元测试 | 各模块 | 时间、解析、分类校验、安全评分覆盖 | ❌ | 无当前应用测试 |
-| L-02 | 集成测试 | C~K | Demo Gmail/163 流程可重复运行 | ❌ | 只有手工测试 |
-| L-03 | 分类回归集 | F-01~F-10 | 至少覆盖 12 类与误分类样例 | ❌ | 未实现 |
-| L-04 | 安全回归集 | E-01~E-08 | 钓鱼与合法通知均覆盖 | ❌ | 未实现 |
-| L-05 | UI 响应式测试 | J-01~J-13 | 桌面/平板/手机截图验收 | ❌ | 已审计发现失败，无自动测试 |
-| L-06 | README | 全部 | 与真实能力一致 | 🟡 | 已有 README，但分类数/Telegram/Ollama 等过期 |
-| L-07 | `.env.example` | B,C,K | 无误导、默认值准确 | 🟡 | Qwen 版本和 Outlook/Telegram说明过期 |
-| L-08 | Git 安全 | 无 | `.gitignore` 排除 Key、DB、缓存 | ❌ | 当前无项目 `.gitignore` |
-| L-09 | PRODUCT/DESIGN 文档 | A-01,J-01 | 产品与设计决策不依赖聊天历史 | 🟡 | 本文件覆盖产品任务，仍无 DESIGN.md |
-
-### M. v2 延期项
-
-| ID | 任务 | 状态 | 说明 |
-|---|---|---|---|
-| M-01 | 回复草稿 Agent | ⏸ | 用户明确要求 v1 不做 |
-| M-02 | Gmail/Outlook 草稿同步 | ⏸ | 依赖 M-01 |
-| M-03 | HITL 审批 | ⏸ | 用户明确要求 v1 不做 |
-| M-04 | 自动发送 | ⏸ | 不纳入当前安全只读版 |
-| M-05 | Outlook OAuth | ⏸ | 当前采用转发至 Gmail |
-| M-06 | Telegram 晨报 | ⏸ | 用户明确取消 |
-
-## 7. 当前完成度汇总
-
-> 完成度按可验收任务计算；“部分完成”不能当作已交付。
-
-| 工作流 | 完成 | 部分 | 未完成 | 延期 | 当前判断 |
-|---|---:|---:|---:|---:|---|
-| A 产品与架构 | 5 | 0 | 0 | 0 | 产品范围、架构边界、数据契约和安全隐私基线已形成 |
-| B 模型与 Prompt | 2 | 5 | 4 | 0 | 能调用模型，缺降级、校验和评测 |
-| C 邮箱连接 | 0 | 3 | 3 | 0 | 单账号 Gmail 可用，生产级连接尚未完成 |
-| D 摄取与解析 | 0 | 3 | 8 | 0 | 核心时间、UID、去重、跳转仍是阻塞项 |
-| E 安全 Agent | 0 | 3 | 5 | 0 | 有原型，无可靠隔离与系统性防护 |
-| F 分类与纠正 | 2 | 2 | 6 | 0 | 分类可运行，但无法证明或持续改善准确率 |
-| G CRM/RAG | 0 | 2 | 5 | 0 | 目前主要是占位和演示数据 |
-| H 数据与审计 | 1 | 0 | 7 | 0 | 基础落库有，审计体系未形成 |
-| I 晨报 | 1 | 0 | 4 | 1 | 能手动生成，但不是严格的今日晨报 |
-| J Web UI | 1 | 6 | 6 | 0 | 可浏览，尚不适合稳定日常操作 |
-| K 运维与安全 | 0 | 0 | 8 | 0 | 尚未进入可发布状态 |
-| L 测试与文档 | 0 | 3 | 6 | 0 | 缺自动化质量保障 |
-| M v2 | 0 | 0 | 0 | 6 | 均为有意延期 |
-
-当前 v1 粗略完成度：
-
-- **完全完成：12 项**
-- **部分完成：27 项**
-- **未完成：62 项**
-- **明确延期：7 项（含晨报推送与 v2）**
-
-完成度不能简单理解为 8%；基础骨架已经存在，所以后续部分任务会复用现有代码。但若按“可验收交付”口径，当前仍处于 **可演示原型 / Alpha**，未达到日常稳定使用。
-
-## 8. 下一轮执行路线图
-
-### Milestone 1：完成当前三项核心需求
-
-目标：真实邮箱当天处理、正确分类、Gmail 原文跳转全部可用。
-
-任务坐标：
-
-`D-01 → D-02 → D-03 → D-04 → D-05 → D-09 → D-10 → F-02 → F-04 → F-05 → F-08 → F-09 → J-06`
-
-退出标准：
-
-1. Gmail 当天邮件只入库一次。
-2. Gmail 未读状态不因同步改变。
-3. 页面时间统一为新加坡收件时间。
-4. 新邮件和历史邮件均可打开 Gmail 原文。
-5. 验证码、安全提醒、教育通知、权限变更不再落入资讯订阅。
-6. 用户可手动纠正并重跑分类。
-
-### Milestone 2：安全与稳定运行
-
-任务坐标：
-
-`K-04 → K-05 → K-06 → C-05 → C-06 → J-09 → K-01 → K-02 → B-03`
-
-退出标准：不再暴露调试器；凭证受保护；失败有中文提示；收信不会卡住页面。
-
-### Milestone 3：安全 Agent 与上下文质量
-
-任务坐标：
-
-`E-01~E-08 → G-01~G-07`
-
-退出标准：合法通知误报可控；转发邮件认证边界明确；网站抓取安全；知识库有真实引用。
-
-### Milestone 4：晨报与 UI
-
-任务坐标：
-
-`I-01~I-05 → J-02~J-13`
-
-退出标准：今日晨报准确；桌面和手机可用；所有用户可见枚举均为中文。
-
-### Milestone 5：测试与发布
-
-任务坐标：
-
-`L-01~L-09 → H-03~H-08 → K-08`
-
-退出标准：回归测试通过；文档一致；可稳定后台运行；可备份恢复。
-
-## 9. 当前可保留的已有成果
-
-以下代码无需推倒重写，可作为后续工作的基础：
-
-- Flask 路由和中文页面骨架
-- SQLite 基础邮件表
-- DeepSeek API 客户端
-- Ollama/Qwen3 8B 客户端
-- Gmail/163 provider preset
-- Demo 邮件模式
-- 安全 Agent 基本 Prompt 与评分结构
-- 分类 Agent 基本 Prompt 与中文摘要
-- 基础联系人查询
-- 基础晨报 Prompt
-- 仪表盘、列表、详情、晨报、设置五个页面
-
-后续应围绕这些骨架修正数据模型和执行方式，而不是继续叠加临时条件。
-
-## 10. 状态维护规则
-
-每完成一个任务，应同时更新：
-
-1. 本文件中的状态与验收证据。
-2. 对应自动化测试。
-3. README 用户操作说明。
-4. 数据库迁移（如字段变化）。
-5. UI 中的中文状态和错误文案。
-
-任务只有在“代码存在 + 自动测试通过 + UI 可验证 + 文档同步”四项都满足时，才从 🟡 改为 ✅。
+| Product and architecture | A-01–A-05 | Scope, deterministic/model boundary, contracts, threat model | Complete |
+| Model and prompts | B-01–B-11 | DeepSeek/Ollama gateway, structured triage, safe prompting | Implemented; model-quality limitations evaluated |
+| Mailbox access | C-01–C-06 | Gmail/NetEase setup, account state, encrypted credentials | Implemented for prototype use |
+| Import and normalization | D-01–D-11 | Read-only UID sync, parsing, sender recovery, deduplication, links | Implemented and regression tested |
+| Security gate | E-01–E-07 | Deterministic signals, quarantine, safe evidence | Implemented; production hardening remains |
+| Triage and actions | F-01–F-09 | Intent, priority, bilingual summaries, deadlines, actions | Implemented and evaluated |
+| Context and knowledge | G-01–G-07 | Stable index, topics, retrieval, cited answers | Implemented and evaluated |
+| Persistence and orchestration | H-01–H-06 | Schema migration, auditability, isolation, background progress | Implemented for local/prototype scale |
+| User interface | I-01–I-10 | Welcome/onboarding, dashboard, details, actions, knowledge, digest | Complete in English and Chinese |
+| Testing and evaluation | J-01–J-08 | Synthetic data, holdout, model eval, performance and human rubric | Complete with saved evidence |
+| Privacy and release | K-01–K-10 | Secret exclusion, CSRF/auth, tenant isolation, safe demo | Complete for course delivery; production gaps documented |
+
+## Key milestones
+
+1. **Reliable ingestion:** moved from manual/simple fetching to bounded first import and incremental provider-UID synchronization without changing read state.
+2. **Traceable analysis:** added deterministic security signals, structured triage, bilingual summaries, priority, deadline, and source-aware actions.
+3. **Cross-email organization:** added content-hashed indexing, topic pages, retrieval, citations, and direct/simulated original-message navigation.
+4. **Usable product flow:** added a permanent welcome screen, onboarding configuration, import progress, dashboard, email detail, actions, knowledge, digest, and settings.
+5. **Safe delivery:** separated local/full functionality from a 20-message public demo and added authentication/isolation for the hosted prototype.
+6. **Transparent evaluation:** checked in fixtures, frozen holdout cases, evaluation runners, raw/summarized results, a human scoring rubric, and failure analysis.
+
+## Verification evidence
+
+| Claim | Evidence |
+|---|---|
+| Product can be reviewed without credentials | `PUBLIC_DEMO=true`, Docker configuration, live Render demo |
+| Demo data are transparent and fictional | `fixtures/demo_email_cases.json`, `fixtures/README.md` |
+| Known-set and held-out behavior are measured separately | `evals/run_final.py`, `evals/run_holdout.py`, saved result files |
+| Real model quality is not presented as perfect | `evals/results/model_evaluation.md`, human semantic review |
+| Software behavior is regression tested | `tests/` and the test command in `README.md` |
+| Privacy boundaries are explicit | `SECURITY_PRIVACY.md`, `.gitignore`, `.dockerignore`, `.env.example` |
+| Architecture and contracts are inspectable | `ARCHITECTURE.md`, `docs/DATA_CONTRACTS.md`, `schemas/` |
+
+## Remaining future work
+
+- Provider OAuth and native Microsoft Graph integration
+- Durable managed database and background queue for real hosted use
+- Account export/deletion, login throttling, key rotation, and independent security review
+- Attachment extraction with strict size/type controls
+- Hybrid lexical/vector retrieval and a larger untouched multilingual evaluation set
+- Cost and latency telemetry, correction feedback, and calibrated confidence
+
+These items are explicitly future work and are not claimed as completed course-delivery functionality.

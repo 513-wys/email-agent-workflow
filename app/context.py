@@ -1,4 +1,4 @@
-"""上下文富化（对应 n8n 子流 03）：CRM 客户画像 + 官网抓取总结 + 知识库（v1 预留）。"""
+"""Enrich email context with local contacts and optional external summaries."""
 import re
 
 import requests

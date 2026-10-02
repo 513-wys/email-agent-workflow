@@ -1,66 +1,55 @@
-# 威胁模型与隐私模型
+# TraceInbox Security and Privacy Model
 
-## 保护目标与数据分类
+## Protected data
 
-保护邮箱授权码、DeepSeek API Key、邮件正文与附件、联系人、分析结果、原文链接、日志和数据库。攻击者包括恶意邮件发送者、同机其他用户、局域网访问者、恶意网站、第三方模型服务和依赖供应链攻击者。
+TraceInbox treats mailbox app passwords, model API keys, session secrets, email content, contacts, derived summaries, source links, logs, and databases as sensitive. Derived data can reveal the meaning of source mail and therefore receives the same protection as email content.
 
-| 级别 | 数据 | 要求 |
+| Class | Examples | Required handling |
 |---|---|---|
-| S1 密钥 | 邮箱授权码、API Key、会话密钥 | 不进入日志、页面或提示词；使用密钥引用和受限权限 |
-| S2 私密内容 | 邮件、附件、联系人、原文链接 | 默认本机保存；发往云模型前明确说明并最小化 |
-| S3 派生数据 | 摘要、分类、风险评分、晨报 | 可泄露原文含义，按私密内容保护 |
-| S4 运行数据 | 耗时、错误类型、模型版本 | 可诊断，但不得包含密钥或完整正文 |
+| Secrets | Mailbox app password, API key, session/encryption keys | Never log or display; encrypt at rest where stored |
+| Private content | Messages, contacts, source links | Keep local by default; minimize before cloud processing |
+| Derived content | Summaries, classifications, actions, digest | Protect as private content |
+| Operational data | Timing, error type, model version | May be logged without secrets or full message text |
 
-## 隐私模式
+## Privacy modes
 
-### 云端增强模式
+**Public course demo.** Uses only 20 synthetic messages with fictional identities. Mailbox synchronization, external model calls, settings mutations, and real provider navigation are disabled or simulated.
 
-- DeepSeek 处理经过最小化的邮件文本。
-- UI 明确显示“邮件内容会发送到 DeepSeek”。
-- 密钥仅用于从本机直连模型服务。
-- 网站抓取单独设置，因为它会向外部网站暴露网络请求。
+**Personal local mode.** Stores the workspace locally. Ollama keeps model inference on the user's computer. IMAP still communicates with the selected mailbox provider.
 
-### 本地隐私模式
+**DeepSeek-enhanced mode.** Sends only the email fields required for analysis to the user's configured DeepSeek endpoint. The interface discloses this data flow before use.
 
-- Ollama 在本机处理内容。
-- 默认关闭发件人网站抓取和远程知识查询；用户开启后说明网络暴露。
-- 邮箱服务仍会看到正常 IMAP 连接，因此该模式不等于完全离线。
+**Hosted multi-user prototype.** Requires authentication, binds every request and background import to one account, isolates workspace databases, hashes login passwords, and encrypts mailbox/model credentials at rest. It is not presented as production-ready hosting.
 
-## 威胁、控制与残余风险
+## Trust boundaries and controls
 
-| 威胁 | 必须控制 | 对应任务 | 残余风险 |
-|---|---|---|---|
-| 密钥从 SQLite、`.env` 或异常栈泄露 | 密钥引用、0600 权限、日志脱敏、轮换指引 | C-06、K-01、K-05 | 主机被完全控制时仍可能泄露 |
-| Flask 调试器暴露执行能力 | 关闭 debug、统一异常页、仅监听本机 | K-04、F-09 | 本机恶意进程仍在信任边界内 |
-| CSRF 或未授权访问 | CSRF token、SameSite/HttpOnly Cookie；托管模式强制登录 | K-02、K-03 | 被盗会话在过期前仍可能被滥用 |
-| 邮件提示词注入 | 标记不可信内容、工具白名单、Schema 校验 | D-04、K-09 | 语义模型仍可能误判 |
-| SSRF 与 DNS 重绑定 | 禁止私网/环回/元数据地址，重解析校验、超时和大小限制 | E-03、K-06 | 公网服务可记录访问 IP |
-| 邮件 HTML/XSS/追踪像素 | 不执行原始 HTML；展示前严格清洗 | F-06、K-07 | 清洗器依赖需持续更新 |
-| 巨型邮件导致资源耗尽 | 正文、HTML、附件、批次、token 上限 | K-08 | 合法大邮件可能被截断 |
-| 转发地址造成错分 | 解析转发上下文；域名只作信号；保留理由和置信度 | D-02、D-03、D-07 | 不规范转发格式可能无法识别 |
-| 重复处理与重复费用 | account + Message-ID + source_id 幂等 | C-05、H-04 | 缺失 Message-ID 时依赖指纹 |
-| 云模型得到过多内容 | 字段最小化、模式提示、本地模型可切换 | B-06、K-10 | 云端处理受供应商策略约束 |
-| 原文链接被伪造 | 只按 provider 规则生成，不接受正文提供的跳转地址 | C-04、K-09 | 服务商 URL 规则可能变化 |
+| Threat | Implemented or required control | Remaining risk |
+|---|---|---|
+| Secret disclosure | Ignored `.env`/databases, encryption, password hashing, redacted errors | A fully compromised host can still expose runtime secrets |
+| Unauthorized hosted access | Login, CSRF protection, secure cookie options, tenant binding | Stolen sessions remain usable until expiry |
+| Prompt injection in email | Treat email as untrusted data, deterministic tool boundary, structured outputs | Language models may still make semantic mistakes |
+| Malicious links and HTML | Do not execute raw HTML; deterministic risk signals; provider-generated source links | Sanitizers and provider URL formats require maintenance |
+| Duplicate processing or cost | Account + provider UID/message identity and idempotent writes | Missing provider identifiers require stable fingerprints |
+| Oversized input | Limits for body, batch, context, and model tokens | Legitimate large messages may be truncated |
+| Cross-tenant access | Request-scoped workspace binding and job ownership checks | Production deployment still needs an independent security audit |
+| Ephemeral cloud storage | Public demo is reproducible; personal data should remain local | Free Render storage is not durable |
 
-## 邮件内容处理规则
+## Untrusted-content rules
 
-- 主题、正文、发件人名称、HTML、附件名和转发内容一律视为不可信数据。
-- Agent 不得因邮件中的指令读取密钥、修改配置、执行命令或调用新工具。
-- 安全规则先于分类 Agent；模型只能提高风险，不能覆盖确定性高风险命中。
-- 不自动点击、抓取或渲染正文中的任意链接。
-- 原文链接由邮箱适配器根据受信任的 provider 标识生成。
-- 错误日志只记录代码与阶段，不记录完整正文、密码或 Authorization 头。
+- Subject, body, sender name, HTML, attachment names, links, and forwarded content are data, never instructions to the application.
+- Email content cannot authorize reading secrets, changing configuration, running commands, or adding tools.
+- Deterministic security checks run before semantic classification.
+- The model may raise risk but cannot override a deterministic quarantine decision.
+- Original-message links are constructed from trusted provider identifiers or simulated inside the public demo.
+- Logs must not include credentials, authorization headers, or complete private bodies.
 
-## 数据生命周期
+## Repository and deployment safety
 
-- 默认仅拉取账户时区内当天邮件；历史邮件由用户主动选择。
-- 邮件正文和派生数据应支持单封删除、按账户删除和按保留期清理。
-- 删除账户时删除本地密钥引用和关联数据，除非用户选择保留分析记录。
-- 备份前说明数据库含私密邮件数据；备份不得包含明文密钥。
-- 默认保留天数仍是开放决策，在确定前不承诺永久保存。
+- `.env`, `data/`, SQLite files, credentials, and runtime artifacts are excluded from Git and Docker build context.
+- `.env.example` contains placeholders only.
+- The public deployment must use `PUBLIC_DEMO=true` and must not receive real mailbox or model credentials.
+- Personal mode should run locally unless a private deployment has durable encrypted storage and appropriate operational controls.
 
-## 发布门槛与当前差距
+## Remaining production work
 
-真实邮箱版本发布前至少满足：关闭 debug、无明文密钥入库、敏感文件权限受限、CSRF 防护、认证失败友好处理、HTML 不直接执行、SSRF 限制、输入大小限制、日志脱敏和 provider 生成原文链接。
-
-当前托管实现已经加入账户登录、密码哈希、CSRF、Secure/HttpOnly Cookie、凭据加密、请求级工作区绑定和后台导入任务归属校验。仍需在生产化前补齐持久化托管数据库、账户数据删除、登录限流、密钥轮换、完整 SSRF 防护和独立安全审计。
+Before real public use, add managed durable storage, account-level export/deletion, login throttling, key rotation, stronger SSRF controls for any future web retrieval, dependency monitoring, security telemetry, backup policy, and an independent penetration/security review.

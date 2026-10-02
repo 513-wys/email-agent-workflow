@@ -1,4 +1,4 @@
-"""Flask 应用：中文 Web 界面 + 路由。"""
+"""Define TraceInbox Flask routes and English/Chinese UI orchestration."""
 import json
 import re
 from datetime import timedelta

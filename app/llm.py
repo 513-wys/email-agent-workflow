@@ -1,4 +1,4 @@
-"""LLM 客户端：默认走 DeepSeek（OpenAI 兼容），未配 key 时回退本地 Ollama。"""
+"""Call DeepSeek's OpenAI-compatible API or a configured local Ollama model."""
 import json
 import re
 

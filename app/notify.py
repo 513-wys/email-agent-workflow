@@ -1,4 +1,4 @@
-"""Telegram 推送（可选）：告警 + 晨报。未配置则静默跳过。"""
+"""Provide optional legacy Telegram alerts when explicitly configured."""
 import requests
 
 from app import config

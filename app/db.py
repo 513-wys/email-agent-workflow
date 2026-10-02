@@ -1,4 +1,4 @@
-"""SQLite 存储：审计日志（emails 表）+ CRM 客户表（contacts 表）。"""
+"""Provide legacy SQLite email-audit and contact persistence helpers."""
 import json
 import sqlite3
 from datetime import datetime
@@ -52,7 +52,7 @@ def init_db():
         """
     )
     conn.commit()
-    # 演示用 CRM 种子数据
+    # Legacy CRM seed records used only by the built-in development path.
     if conn.execute("SELECT COUNT(*) FROM contacts").fetchone()[0] == 0:
         conn.executemany(
             "INSERT INTO contacts(email,name,tier,deal_stage) VALUES(?,?,?,?)",

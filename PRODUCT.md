@@ -1,91 +1,72 @@
-# Product
-<!-- impeccable:product-schema 1 -->
+# TraceInbox Product Definition
 
-## Platform
+## Product summary
 
-中英双语 Web 应用，可在个人电脑上运行，也可部署为公开的多用户服务。英文是课程作业的默认交付语言，中文是个人使用语言。托管模式下每位用户注册独立账户、连接自己的邮箱并提供自己的模型 API Key；邮件、任务、知识库、同步状态和设置按账户隔离。应用可连接 Gmail 和网易邮箱；Outlook 邮件在 v1 通过转发到 Gmail 后处理。
+TraceInbox is a bilingual, privacy-aware email intelligence workspace. It can run on a personal computer or as an authenticated multi-user prototype. English is the course-delivery language; Chinese is an equivalent personal-use interface.
 
-## Users
+The product converts email into a traceable workflow: it imports messages, recovers original senders from forwarded mail, checks deterministic security signals, classifies and summarizes content, extracts action items, groups related messages into topics, produces a daily digest, and answers cross-email questions with source citations.
 
-主要用户是希望集中筛选、理解和总结个人工作邮件的个人用户。用户可以在本地模式中保留全部数据，也可以使用公开托管版本的隔离工作区。用户可配置邮箱授权码或个人 API Key，但不应被要求理解 IMAP、提示词或模型接口细节。
+## Primary persona
 
-## Product Purpose
+The primary user is a student or knowledge worker managing course, project, subscription, security, support, career, and event messages across one or more addresses. The user wants concise decisions without losing access to the original evidence.
 
-把当天收到的邮件变成可检查、可追溯的工作流：安全检查、内容分类、优先级判断、上下文补充和中文晨报。用户可以从结果直接回到原邮箱查看完整原文、HTML 内容、附件和原始链接。
+## Inputs and outputs
 
-## Positioning
+**Inputs**
 
-这是用户自有、可本地运行的邮件 Agent，而不是 n8n 的操作界面或托管邮箱服务。产品借鉴 n8n 的节点化工作流思想，但业务逻辑、数据、页面和运行时均由本项目控制。
+- Gmail or NetEase mail through read-only IMAP
+- Outlook or institutional mail forwarded to a connected mailbox
+- A personal DeepSeek API key or a local Ollama endpoint
+- The checked-in synthetic fixture in public-demo mode
 
-## Operating Context
+**Outputs**
 
-- 支持单用户本机模式与多用户托管模式。
-- 托管模式必须要求登录，并为每位用户提供独立数据工作区。
-- 邮箱授权码和模型 API Key 必须加密保存，且不得在页面回显。
-- 邮件源包括 Gmail 和网易邮箱；v1 允许 Outlook 转发至 Gmail。
-- 模型支持个人 DeepSeek API，也支持本地 Ollama Qwen3 8B。
-- DeepSeek 模式会把分析所需的邮件内容发送至 DeepSeek；Ollama 模式在本机推理。
-- 用户可能同时接收中文、英文和由教育邮箱等地址转发的邮件。
-- 邮件列表只处理当天邮件，时间以邮件的实际收件时间为准。
+- Prioritized and categorized email views
+- English and Chinese summaries
+- Extracted action items and deadlines
+- Cross-email topic pages
+- Cited question answering
+- A daily digest
+- Provider or simulated-original-message links
 
-## Capabilities and Constraints
+## v1 scope
 
-### v1 必须具备
+The implemented scope includes mailbox onboarding, configurable first import, incremental synchronization, sender recovery, security screening, multidimensional triage, summaries, actions, knowledge indexing, topic grouping, cited retrieval, digest generation, English/Chinese switching, and separate local, hosted, and safe-demo modes.
 
-- 配置个人 DeepSeek API Key，或使用本地 Ollama。
-- 连接 Gmail 与网易邮箱并拉取当天邮件。
-- 执行安全扫描、细粒度分类、优先级判断和中文摘要。
-- 分类依据正文、主题和转发后的原始上下文，不以发件域名直接判定垃圾邮件。
-- 区分验证码、安全提醒、账单与付款、会议日程、教育通知、商务合作、资讯订阅等类型。
-- 展示真实收件时间、邮箱来源、分类、优先级和处理状态。
-- 提供跳转到 Gmail/原邮箱原文的链接。
-- 页面默认英文并可切换中文；语言偏好保存在浏览器中。
-- 在应用内生成与当前界面语言一致的晨报。
-- 对认证失败、模型失败和单封邮件失败给出中文、可操作的错误信息。
+The product deliberately does not send, delete, archive, or automatically reply to email. Native Outlook OAuth, attachment understanding, provider OAuth, vector retrieval, and production-grade managed storage remain future work.
 
-### v1 不包含
+## Product principles
 
-- 自动发送邮件。
-- 自动回复、回复草稿与人工审批工作流。
-- Telegram 晨报推送。
-- Outlook 原生 OAuth 接入。
-- 企业团队权限、共享邮箱和组织级管理。
+1. **The source mailbox remains authoritative.** TraceInbox presents derived analysis and always preserves a route back to evidence.
+2. **Deterministic operations precede model judgment.** Authentication, dates, deduplication, links, security thresholds, and persistence are controlled by code.
+3. **Content determines meaning.** Sender domains are useful signals but do not replace semantic analysis.
+4. **Failures degrade locally.** One failed message or model call must not break the whole import.
+5. **Privacy choices are explicit.** The interface distinguishes cloud-model processing from local inference.
+6. **Advice is separated from action.** The model can recommend and summarize, but it does not perform external email actions.
+7. **Evidence is visible.** Cross-email answers include openable sources, and uncertain results should be stated as uncertain.
 
-## Brand Commitments
+## Deployment modes
 
-- 英文界面是默认交付版本，中文界面是等功能的个人使用版本；两种语言都使用自然、明确的文案。
-- 用户始终知道邮件来自哪个账户、何时收到、如何查看原文。
-- 自动判断必须可追溯，不能把模型结论伪装成确定事实。
-- 安全与隐私设置明确说明数据是否离开本机。
-- 错误页面不能暴露堆栈、密钥、邮箱授权码或邮件隐私内容。
+| Mode | Mailbox data | Model | Intended use |
+|---|---|---|---|
+| Public course demo | 20 synthetic messages | Reproducible local answers | Safe review and presentation |
+| Personal local | User-controlled local database | DeepSeek or Ollama | Individual use |
+| Hosted multi-user prototype | Per-account isolated workspace | User-supplied encrypted credentials | Experimental shared deployment |
 
-## Evidence on Hand
+## Success criteria
 
-- 原始 PRD：企业邮件处理链路，包括安全网关、意图分类、上下文补充、RAG、草稿审批和晨报。
-- 用户已确认：独立应用、中文界面、个人 API、本地模型备选、Gmail/网易接入、Outlook 转发、v1 不做自动回复、不做 Telegram 推送。
-- 当前实现：Flask、SQLite、IMAP、DeepSeek/OpenAI 兼容接口、Ollama、本地中文 Web UI。
-- 架构参考：`enescingoz/awesome-n8n-templates` 中的邮件分类、人工审批、日报和 Ollama 工作流。
+- A reviewer can run the safe demo without secrets.
+- A personal user can import mail without changing read status.
+- Forwarded messages show the original sender when recoverable.
+- Important actions and deadlines are easy to scan.
+- Related messages can be inspected as one topic.
+- Cross-email answers cite only relevant sources.
+- The repository exposes its data, evaluation method, targets, reached metrics, and known failures.
 
-## Product Principles
+## Known limitations
 
-1. **原邮箱是真实来源。** 应用展示分析结果，完整邮件仍由 Gmail、网易或 Outlook 提供。
-2. **先确定性处理，再调用模型。** 收信、时间、身份、去重、链接、安全阈值和状态迁移由代码控制。
-3. **内容决定语义。** 地址和域名只作为风险信号，不能代替正文分类。
-4. **每一步可降级。** 单封邮件或单个模型调用失败不能让整批收信崩溃。
-5. **隐私选择清晰。** 用户能区分云模型与本地模型，并知道各自的数据流向。
-6. **建议与动作分离。** v1 只分析和生成内容，不代表用户执行外部动作。
-
-## Accessibility & Inclusion
-
-- 页面支持键盘操作、可见焦点、语义化标签和足够色彩对比度。
-- 状态和优先级不能仅靠颜色区分。
-- 中英文邮件、姓名和时间应正确显示。
-- 错误信息说明用户下一步可以做什么，不使用只有开发者能理解的术语。
-
-## Open Decisions
-
-- Outlook 原生 OAuth 的目标版本和实现方案。
-- 是否允许在“本地隐私模式”下访问发件人网站补充上下文。
-- 邮件正文和分析结果的默认保留天数。
-- 后续是否加入附件解析、向量检索和多账户统一收件箱。
-- v2 自动回复采用逐封审批、批量审批或只生成草稿。
+- IMAP app passwords are less convenient than OAuth.
+- SQLite is appropriate for local use but Render's free filesystem is not durable production storage.
+- Lexical retrieval is transparent and strong for identifiers, but weaker for paraphrases than hybrid retrieval.
+- The synthetic and holdout datasets are small, and the model-backed evaluation found incomplete answers, a security contradiction, and slow QA latency.
+- A production release would still require durable storage, deletion controls, login rate limiting, key rotation, broader security testing, and a larger multilingual holdout.

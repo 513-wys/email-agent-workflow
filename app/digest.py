@@ -1,4 +1,4 @@
-"""每日晨报（对应 n8n 子流 05）：汇总邮件 + 待办，生成全中文 Markdown。"""
+"""Generate a concise daily digest from analyzed emails and action items."""
 from app import llm
 
 DIGEST_PROMPT = (

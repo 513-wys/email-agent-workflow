@@ -1,4 +1,4 @@
-"""安全网关（对应 n8n 子流 01）：外链扫描 + 白名单 + 威胁评分。"""
+"""Apply deterministic link, sender, and content risk signals before triage."""
 import re
 
 from app import llm, settings_store

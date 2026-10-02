@@ -1,4 +1,4 @@
-"""主流水线（对应 n8n 主调度器 00）：安全 → 分类 → 富化 → 落库。"""
+"""Orchestrate security, triage, enrichment, and persistence per message."""
 import hashlib
 import json
 

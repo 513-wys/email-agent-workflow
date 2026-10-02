@@ -1,4 +1,4 @@
-"""运行时可改设置：优先读本地 SQLite，未设置则回退 .env/config 默认值。"""
+"""Store runtime settings in SQLite with environment-based defaults."""
 import sqlite3
 import base64
 import hashlib

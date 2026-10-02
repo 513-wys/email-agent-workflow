@@ -1,4 +1,4 @@
-"""启动入口：python run.py"""
+"""Start the TraceInbox development web server with ``python run.py``."""
 from app.main import app  # noqa: F401
 from app import config
 

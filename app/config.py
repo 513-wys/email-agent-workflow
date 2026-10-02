@@ -1,4 +1,4 @@
-"""配置加载：优先读 .env，其次读环境变量，最后用默认值。"""
+"""Load TraceInbox configuration from .env, environment, and safe defaults."""
 import os
 import secrets
 from pathlib import Path

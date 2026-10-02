@@ -1,4 +1,4 @@
-"""邮件接入：IMAP 拉取未读 + 演示模式（内置示例邮件）。"""
+"""Fetch email through read-only IMAP or the legacy built-in demo source."""
 import imaplib
 import email
 import hashlib
@@ -12,7 +12,7 @@ from app.forwarded_mail import normalize
 from app.mail_links import gmail_message_url
 
 
-# 演示模式下的 4 条示例邮件（对应原测试用例 TC-01 ~ TC-04）
+# Four legacy development messages retained for backward-compatible demo tests.
 DEMO_EMAILS = [
     {
         "message_id": "demo-phish-001",
